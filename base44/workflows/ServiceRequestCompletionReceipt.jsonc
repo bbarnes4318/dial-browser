@@ -1,0 +1,46 @@
+{
+  "name": "ServiceRequestCompletionReceipt",
+  "description": "Sends an SMS receipt to the user the moment a service request is marked as completed",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ServiceRequest",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status == \"completed\" and .trigger.old_data.status != \"completed\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "service_request_completion_receipt",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_receipt": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendCompletionReceipt",
+            "args": {
+              "record_id": "${ .trigger.entity_id }",
+              "service_type": "${ .trigger.data.service_type }",
+              "requester_name": "${ .trigger.data.requester_name }",
+              "requester_phone": "${ .trigger.data.requester_phone }",
+              "details": "${ .trigger.data.details }",
+              "ai_notes": "${ .trigger.data.ai_notes }",
+              "ai_urgency": "${ .trigger.data.ai_urgency }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send completion SMS receipt",
+            "description": "Sends SMS receipt when request completes"
+          }
+        }
+      }
+    ]
+  }
+}

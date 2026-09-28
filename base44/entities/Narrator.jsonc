@@ -1,0 +1,61 @@
+{
+  "name": "Narrator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Narrator display name. Must match the Audiobook.narrator field (case-insensitive) to link that narrator's recorded titles."
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 3000,
+      "description": "Narrator biography shown on the profile page"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "Short one-line tagline shown under the name"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Primary headshot / avatar URL"
+    },
+    "gallery_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Ordered photo gallery URLs shown in the profile gallery"
+    },
+    "accent": {
+      "type": "string",
+      "description": "Voice accent or dialect descriptor (e.g. 'American \u00b7 Baritone')"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this narrator is featured on the library page"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

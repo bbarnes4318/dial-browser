@@ -1,0 +1,117 @@
+{
+  "name": "FoodOrder",
+  "type": "object",
+  "properties": {
+    "call_sid": {
+      "type": "string",
+      "description": "Twilio CallSid used as the voice-session key while the order is being built over the phone"
+    },
+    "caller_phone": {
+      "type": "string",
+      "description": "Phone number of the member placing the order (used for delivery contact and SMS receipts)"
+    },
+    "step": {
+      "type": "string",
+      "enum": [
+        "discover",
+        "menu",
+        "cart",
+        "confirm",
+        "placed",
+        "status_check"
+      ],
+      "default": "discover",
+      "description": "Current conversation step in the voice ordering flow"
+    },
+    "provider": {
+      "type": "string",
+      "description": "Delivery provider identifier (e.g. doordash, ubereats) the order was placed through"
+    },
+    "restaurant_id": {
+      "type": "string",
+      "description": "Delivery provider's restaurant identifier for the selected restaurant"
+    },
+    "restaurant_name": {
+      "type": "string",
+      "description": "Name of the selected restaurant (denormalized for voice read-back and SMS)"
+    },
+    "cart_items_json": {
+      "type": "string",
+      "description": "JSON string of the cart items array [{name, qty, price}] (denormalized for storage)"
+    },
+    "cart_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Running cart total in USD, read back to the member during the call"
+    },
+    "delivery_address": {
+      "type": "string",
+      "description": "Delivery address spoken by the member and confirmed before placing"
+    },
+    "confirmation_code": {
+      "type": "string",
+      "description": "Short code read to the member and sent via SMS once the order is placed"
+    },
+    "provider_order_id": {
+      "type": "string",
+      "description": "Order id returned by the delivery provider once the order is accepted"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "placed",
+        "confirmed",
+        "out_for_delivery",
+        "delivered",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Lifecycle status of the food order"
+    }
+  },
+  "required": [
+    "caller_phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

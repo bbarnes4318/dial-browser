@@ -1,0 +1,95 @@
+{
+  "name": "SavedService",
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string",
+      "description": "Display name of the bookmarked service, grocery list, or host profile"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "voice_service",
+        "grocery_list",
+        "host_profile",
+        "dial_service",
+        "marketplace_listing",
+        "contractor",
+        "food",
+        "transport"
+      ],
+      "default": "voice_service",
+      "description": "What type of item was bookmarked"
+    },
+    "reference_id": {
+      "type": "string",
+      "description": "Entity ID or dial code this bookmark points to"
+    },
+    "dial_code": {
+      "type": "string",
+      "description": "Dial code for quick access if applicable"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "Internal URL path to navigate to when clicked"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Short description or notes about why this was saved"
+    },
+    "icon_emoji": {
+      "type": "string",
+      "description": "Emoji icon for visual display"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category label for grouping (e.g. Medical, Music, Grocery, Food, Transport)"
+    }
+  },
+  "required": [
+    "service_name",
+    "service_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

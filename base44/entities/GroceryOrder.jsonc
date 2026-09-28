@@ -1,0 +1,97 @@
+{
+  "name": "GroceryOrder",
+  "type": "object",
+  "properties": {
+    "customer_name": {
+      "type": "string",
+      "description": "Name of the person who placed the grocery order"
+    },
+    "customer_phone": {
+      "type": "string",
+      "description": "Phone number for delivery contact"
+    },
+    "raw_list": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "The original spoken or typed grocery list"
+    },
+    "cart_items_json": {
+      "type": "string",
+      "description": "JSON string of the structured cart items array"
+    },
+    "total_estimate": {
+      "type": "number",
+      "description": "Estimated total cost of items in USD"
+    },
+    "delivery_fee": {
+      "type": "number",
+      "default": 4.99,
+      "description": "Delivery fee charged"
+    },
+    "store_assigned": {
+      "type": "string",
+      "description": "Name of the grocery store assigned"
+    },
+    "estimated_delivery_time": {
+      "type": "string",
+      "description": "Estimated delivery time frame"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "out_for_delivery",
+        "delivered",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Current status of the grocery order"
+    }
+  },
+  "required": [
+    "raw_list",
+    "store_assigned"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

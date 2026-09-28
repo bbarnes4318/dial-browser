@@ -1,0 +1,90 @@
+{
+  "name": "ArtistProfile",
+  "type": "object",
+  "properties": {
+    "artist_name": {
+      "type": "string",
+      "description": "Stage name or artist name"
+    },
+    "genre": {
+      "type": "string",
+      "description": "Primary music genre (e.g. Hip-Hop, Jazz, Afrobeats)"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number for artist contact and SMS distribution"
+    },
+    "email": {
+      "type": "string",
+      "description": "Optional email address"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Short artist biography"
+    },
+    "music_url": {
+      "type": "string",
+      "description": "URL of uploaded music track file"
+    },
+    "artwork_url": {
+      "type": "string",
+      "description": "URL of uploaded cover artwork image"
+    },
+    "dedication": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional dedication message to fans"
+    },
+    "upcoming_shows": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of upcoming show and tour date entries (e.g. 'Jul 15 - Madison Square Garden, NYC')"
+    },
+    "social_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of social media profile URLs"
+    }
+  },
+  "required": [
+    "artist_name",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

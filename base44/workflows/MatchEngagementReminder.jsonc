@@ -1,0 +1,44 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "dating_match_reminder",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_reminders": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendMatchReminders"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send match reminders",
+            "description": "SMS inactive members with new matches"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 */6 * * *",
+      "one_time_date": null,
+      "timezone": "America/Los_Angeles",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Every 6 hours, sends a friendly SMS to members with new matches who haven't visited the dating portal in 48+ hours, to keep them engaged. Rate-limited to one reminder per member per 48 hours.",
+  "name": "Dating Match Engagement Reminder"
+}

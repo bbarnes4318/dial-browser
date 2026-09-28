@@ -1,0 +1,57 @@
+{
+  "name": "SportsChatMessage",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the sender"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Denormalized display name of the sender"
+    },
+    "sport": {
+      "type": "string",
+      "default": "all",
+      "description": "Sport context for this message, or 'all' for the general live-game chat"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 280,
+      "description": "Chat message text"
+    }
+  },
+  "required": [
+    "message"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

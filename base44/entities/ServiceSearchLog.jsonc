@@ -1,0 +1,67 @@
+{
+  "name": "ServiceSearchLog",
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "Sanitized, PII-stripped search term the user typed (lowercased, emails/phones redacted) \u2014 never stores raw identity data"
+    },
+    "category": {
+      "type": "string",
+      "description": "Active category filter when the search was logged, or 'All'"
+    },
+    "region": {
+      "type": "string",
+      "description": "Active region filter when logged, or 'All'"
+    },
+    "collection": {
+      "type": "string",
+      "description": "Active collection filter when logged, or 'all'"
+    },
+    "result_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of services matching the search at log time"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "directory",
+        "landing"
+      ],
+      "default": "directory",
+      "description": "Which surface the search originated from"
+    },
+    "user_hash": {
+      "type": "string",
+      "description": "Non-reversible opaque identifier of the searcher (SHA-256 hash prefix of user id) or 'anonymous' \u2014 never the raw user id, email, or name"
+    }
+  },
+  "required": [
+    "query",
+    "source"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

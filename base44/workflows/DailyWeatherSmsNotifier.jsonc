@@ -1,0 +1,45 @@
+{
+  "name": "Daily Weather SMS Notifier",
+  "description": "Sends a daily morning weather forecast SMS to all active weather subscribers",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_weather_sms",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_weather_sms": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendDailyWeather",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send Daily Weather SMS",
+            "description": "Fetch weather and SMS all subscribers"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 6,
+      "interval_unit": "hours",
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Scans softphone entitlements every 6 hours and notifies members whose monthly call/text balance is below 10%, encouraging a top-up.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "low_credit_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "check-low-credit-alerts",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan low-credit balances",
+            "description": "Notify members under 10% remaining"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Low Credit Alert Notifier"
+}

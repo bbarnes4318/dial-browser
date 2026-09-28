@@ -1,0 +1,95 @@
+{
+  "name": "CategoryAlertSubscription",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Name of the person requesting provider availability alerts"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number to receive SMS alerts when a new provider joins a subscribed category"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "medical",
+        "dental",
+        "real_estate",
+        "construction",
+        "grocery",
+        "weather",
+        "music",
+        "jobs",
+        "bill_payment",
+        "marketplace"
+      ],
+      "description": "The service category the subscriber wants new-provider alerts for"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "all",
+        "northeast",
+        "southeast",
+        "midwest",
+        "southwest",
+        "west",
+        "national"
+      ],
+      "default": "all",
+      "description": "Regional filter for nearby provider alerts"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the subscription is currently receiving alerts"
+    }
+  },
+  "required": [
+    "full_name",
+    "phone",
+    "category"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

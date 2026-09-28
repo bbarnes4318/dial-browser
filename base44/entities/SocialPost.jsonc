@@ -1,0 +1,95 @@
+{
+  "name": "SocialPost",
+  "type": "object",
+  "properties": {
+    "author_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile that authored the post"
+    },
+    "author_handle": {
+      "type": "string",
+      "description": "Denormalized handle of the author for card rendering"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Denormalized display name of the author for card rendering"
+    },
+    "author_avatar": {
+      "type": "string",
+      "description": "Denormalized avatar URL of the author for card rendering"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Text body of the post (empty for voice-only posts)"
+    },
+    "media_url": {
+      "type": "string",
+      "description": "URL of an attached image shown below the text"
+    },
+    "voice_note_url": {
+      "type": "string",
+      "description": "URL of the voice note audio attached to the post"
+    },
+    "voice_note_duration": {
+      "type": "number",
+      "default": 0,
+      "description": "Duration of the voice note in seconds"
+    },
+    "voice_note_transcript": {
+      "type": "string",
+      "description": "Auto-generated transcript of the voice note"
+    },
+    "like_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of likes on this post"
+    },
+    "comment_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of comments on this post"
+    },
+    "share_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times this post was shared"
+    }
+  },
+  "required": [
+    "author_profile_id",
+    "author_handle",
+    "author_name",
+    "text"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

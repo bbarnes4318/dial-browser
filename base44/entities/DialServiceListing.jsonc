@@ -1,0 +1,139 @@
+{
+  "name": "DialServiceListing",
+  "type": "object",
+  "properties": {
+    "provider_name": {
+      "type": "string",
+      "description": "Name of the service provider or company"
+    },
+    "service_category": {
+      "type": "string",
+      "enum": [
+        "construction",
+        "plumbing",
+        "electrical",
+        "hvac",
+        "roofing",
+        "landscaping",
+        "automotive",
+        "cleaning",
+        "legal",
+        "medical",
+        "it",
+        "real_estate",
+        "other"
+      ],
+      "default": "other",
+      "description": "Primary service category"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of specific specialties or sub-services offered"
+    },
+    "availability_text": {
+      "type": "string",
+      "description": "Human-readable availability (e.g. Mon-Fri 8AM-6PM)"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number for the provider"
+    },
+    "city": {
+      "type": "string",
+      "description": "City where the provider is based"
+    },
+    "state": {
+      "type": "string",
+      "description": "US state where the provider operates"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "northeast",
+        "southeast",
+        "midwest",
+        "southwest",
+        "west",
+        "national"
+      ],
+      "default": "national",
+      "description": "Regional operating area"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 0,
+      "description": "Average rating from 0 to 5"
+    },
+    "review_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of customer reviews"
+    },
+    "dial_code": {
+      "type": "string",
+      "description": "1 Call Away dial code to reach this provider"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Description of services offered"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "URL of the provider's logo or avatar image"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the provider is verified"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this listing is active and accepting callbacks"
+    }
+  },
+  "required": [
+    "provider_name",
+    "service_category",
+    "phone",
+    "city",
+    "state"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

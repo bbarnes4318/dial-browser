@@ -1,0 +1,47 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "voice_broadcast_scheduler",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "fire_due": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendVoiceBroadcast",
+            "args": {
+              "action": "send_due"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Launch due broadcasts",
+            "description": "Sends all scheduled broadcasts past their launch time"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Fires every 5 minutes to launch any voice broadcasts that have reached their scheduled launch time.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": 5,
+      "interval_unit": "minutes",
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Voice Broadcast Scheduler"
+}

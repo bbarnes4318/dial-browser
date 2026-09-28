@@ -1,0 +1,86 @@
+{
+  "name": "Certificate",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the certified learner"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Denormalized learner display name shown on the certificate"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Denormalized learner email"
+    },
+    "course_id": {
+      "type": "string",
+      "description": "Course this certificate was issued for"
+    },
+    "course_title": {
+      "type": "string",
+      "description": "Denormalized course title shown on the certificate"
+    },
+    "verification_code": {
+      "type": "string",
+      "description": "Unique public code used to verify this certificate by phone or web"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the certificate was issued"
+    },
+    "pdf_file_uri": {
+      "type": "string",
+      "description": "Private storage URI of the generated PDF certificate"
+    },
+    "revoked": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an admin has revoked this certificate"
+    },
+    "revoked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the certificate was revoked"
+    },
+    "exam_attempt_id": {
+      "type": "string",
+      "description": "Passing exam attempt that triggered this certificate"
+    }
+  },
+  "required": [
+    "course_id",
+    "verification_code"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "name": "SharePurchase",
+  "type": "object",
+  "properties": {
+    "show_share_id": {
+      "type": "string",
+      "description": "ID of the ShowShare offering this purchase is for"
+    },
+    "show_title": {
+      "type": "string",
+      "description": "Denormalized show title for display"
+    },
+    "creator_name": {
+      "type": "string",
+      "description": "Denormalized creator name for display"
+    },
+    "buyer_name": {
+      "type": "string",
+      "description": "Name of the purchaser"
+    },
+    "buyer_email": {
+      "type": "string",
+      "description": "Email of the purchaser"
+    },
+    "shares": {
+      "type": "number",
+      "description": "Number of shares purchased in this transaction"
+    },
+    "price_per_share": {
+      "type": "number",
+      "description": "Price per share at the time of purchase (denormalized from the offering)"
+    },
+    "total_amount": {
+      "type": "number",
+      "description": "Total amount charged for this purchase"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session id \u2014 the unique key the webhook correlates payment by. One record per purchase so concurrent checkouts never clobber each other."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "cancelled",
+        "failed"
+      ],
+      "default": "pending",
+      "description": "Lifecycle of the share purchase"
+    },
+    "fulfilled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the shares were credited to the offering"
+    }
+  },
+  "required": [
+    "show_share_id",
+    "buyer_name",
+    "buyer_email",
+    "shares",
+    "checkout_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "name": "SportsAlert",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the subscriber"
+    },
+    "sport": {
+      "type": "string",
+      "description": "Sport the user wants live-broadcast alerts for (soccer, football, baseball, basketball, motorsport, all)"
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Optional specific station id from the Dial Sports streams to monitor"
+    },
+    "channel_name": {
+      "type": "string",
+      "description": "Denormalized channel name for display"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number for SMS alerts (optional). Empty = in-app only."
+    },
+    "notify_sms": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to send SMS alerts when the broadcast goes live"
+    },
+    "notify_in_app": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to send in-app alerts when the broadcast goes live"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this alert subscription is currently active"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "sport"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

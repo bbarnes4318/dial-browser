@@ -1,0 +1,83 @@
+{
+  "name": "VehicleInquiry",
+  "type": "object",
+  "properties": {
+    "vehicle_id": {
+      "type": "string",
+      "description": "VehicleListing this inquiry is about"
+    },
+    "vehicle_title": {
+      "type": "string",
+      "description": "Denormalized vehicle title for display"
+    },
+    "buyer_name": {
+      "type": "string",
+      "description": "Name of the interested buyer"
+    },
+    "buyer_phone": {
+      "type": "string",
+      "description": "Buyer contact number"
+    },
+    "buyer_email": {
+      "type": "string",
+      "description": "Optional buyer email"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional buyer message to the dealer"
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "purchase",
+        "test_drive",
+        "info"
+      ],
+      "default": "purchase",
+      "description": "What the buyer wants \u2014 purchase, test drive, or more info"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "closed"
+      ],
+      "default": "new",
+      "description": "Dealer/admin follow-up status"
+    }
+  },
+  "required": [
+    "vehicle_id",
+    "buyer_name",
+    "buyer_phone"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "name": "MerchantOrder",
+  "type": "object",
+  "properties": {
+    "call_sid": {
+      "type": "string",
+      "description": "Twilio CallSid used as the voice-session key while the order is built over the phone"
+    },
+    "caller_phone": {
+      "type": "string",
+      "description": "Phone number of the customer who placed the phone-in order"
+    },
+    "merchant_id": {
+      "type": "string",
+      "description": "ID of the MerchantDispatch this order was placed with (empty while the merchant is still being identified)"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the merchant who owns this order \u2014 set when the merchant is identified so the merchant can view their own orders in the dashboard via row-level read access"
+    },
+    "items_json": {
+      "type": "string",
+      "description": "JSON string of the order items array [{name, qty}] transcribed from the caller's speech"
+    },
+    "order_type": {
+      "type": "string",
+      "enum": [
+        "pickup",
+        "delivery"
+      ],
+      "default": "pickup",
+      "description": "Whether the order is pickup or delivery"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Name of the caller if they stated it (denormalized for dashboard display and SMS)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Special instructions spoken by the caller (e.g. extra sauce, no onions)"
+    },
+    "confirmation_code": {
+      "type": "string",
+      "description": "Short code spoken to the caller and sent via SMS receipt once the order fires"
+    },
+    "step": {
+      "type": "string",
+      "enum": [
+        "identify_merchant",
+        "awaiting_order",
+        "confirm",
+        "fired"
+      ],
+      "default": "identify_merchant",
+      "description": "Current conversation step in the voice order flow state machine"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "fired",
+        "cancelled",
+        "failed"
+      ],
+      "default": "draft",
+      "description": "Lifecycle status of the order"
+    },
+    "webhook_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "delivered",
+        "failed",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Delivery status of the dispatch webhook POST"
+    },
+    "fired_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the order fired to the merchant webhook"
+    },
+    "cancel_window_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 60-second staff cancel window expires"
+    }
+  },
+  "required": [
+    "caller_phone"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "Critical Safety Alert Notifier",
+  "description": "Automatically broadcasts an SOS SMS to all registered members when a critical or sos-severity EmergencyBroadcast is created",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "EmergencyBroadcast",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ .trigger.data.severity == \"critical\" or .trigger.data.severity == \"sos\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "critical_safety_alert_notifier",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "broadcast_sos": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "broadcastEmergencySos",
+            "args": {
+              "broadcast_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Broadcast SOS SMS to all members",
+            "description": "Sends immediate emergency SMS to every registered member"
+          }
+        }
+      }
+    ]
+  }
+}

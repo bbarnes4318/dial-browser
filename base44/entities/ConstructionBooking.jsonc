@@ -1,0 +1,111 @@
+{
+  "name": "ConstructionBooking",
+  "type": "object",
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "description": "ID of the ConstructionProvider being booked"
+    },
+    "provider_name": {
+      "type": "string",
+      "description": "Company name (denormalized for display)"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Name of the person booking the project"
+    },
+    "customer_phone": {
+      "type": "string",
+      "description": "Phone number for the contractor to follow up"
+    },
+    "project_type": {
+      "type": "string",
+      "description": "Type of project (e.g. roofing, remodeling, new construction)"
+    },
+    "project_description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Brief description of the project scope"
+    },
+    "preferred_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Preferred start date for the project"
+    },
+    "preferred_time": {
+      "type": "string",
+      "enum": [
+        "morning",
+        "afternoon",
+        "evening",
+        "flexible"
+      ],
+      "default": "flexible",
+      "description": "Preferred time of day for the project start"
+    },
+    "estimated_budget": {
+      "type": "string",
+      "description": "User's estimated budget range"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "confirmed",
+        "scheduled",
+        "completed",
+        "cancelled"
+      ],
+      "default": "requested",
+      "description": "Current booking status"
+    }
+  },
+  "required": [
+    "provider_id",
+    "customer_name",
+    "customer_phone",
+    "project_type",
+    "preferred_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

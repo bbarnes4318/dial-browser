@@ -1,0 +1,120 @@
+{
+  "name": "Enrollment",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string",
+      "description": "Course the learner enrolled in"
+    },
+    "course_title": {
+      "type": "string",
+      "description": "Denormalized course title for display"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the enrolled learner. Empty for public buyers who paid without an account."
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Email of the enrolled learner (collected at Wix checkout)"
+    },
+    "learner_name": {
+      "type": "string",
+      "description": "Denormalized display name of the learner"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Percent of lessons completed"
+    },
+    "current_lesson_index": {
+      "type": "number",
+      "default": 0,
+      "description": "Index of the next lesson to resume"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "completed",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "pending = checkout created; paid = payment confirmed (lessons unlocked); completed = final exam passed; expired = access lapsed"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session id linking this enrollment to a confirmed payment"
+    },
+    "price_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount actually charged at checkout (after any referral/promo discount)"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When payment was confirmed and lessons unlocked"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the learner passed the final exam and the enrollment was marked complete"
+    },
+    "certificate_id": {
+      "type": "string",
+      "description": "Certificate record id issued on completion"
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Referral code applied at checkout, if a friend enrolled via a referral link. Empty when no referral was used."
+    },
+    "referrer_user_id": {
+      "type": "string",
+      "description": "User id of the referrer who invited this learner. Empty when no referral was used."
+    },
+    "referral_discount_applied": {
+      "type": "number",
+      "default": 0,
+      "description": "Discount amount (USD) applied to the enrollment fee via the referral code"
+    },
+    "referral_rewarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the referrer has already been credited for this enrollment (idempotency flag for the payment webhook)"
+    }
+  },
+  "required": [
+    "course_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

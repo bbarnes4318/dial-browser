@@ -1,0 +1,112 @@
+{
+  "name": "StreamSession",
+  "type": "object",
+  "properties": {
+    "artist_name": {
+      "type": "string",
+      "description": "Name of the creator who hosted the stream"
+    },
+    "stream_title": {
+      "type": "string",
+      "description": "Title of the live stream broadcast"
+    },
+    "stream_mode": {
+      "type": "string",
+      "enum": [
+        "video",
+        "audio"
+      ],
+      "default": "video",
+      "description": "Whether the stream was video or audio only"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "ended"
+      ],
+      "default": "active",
+      "description": "Whether the stream is currently live or has ended"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the stream started"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the stream ended"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Total stream duration in seconds"
+    },
+    "peak_listeners": {
+      "type": "number",
+      "default": 0,
+      "description": "Highest concurrent listener count during the stream"
+    },
+    "peak_time_offset": {
+      "type": "number",
+      "default": 0,
+      "description": "Seconds into the stream when peak listeners occurred"
+    },
+    "final_listeners": {
+      "type": "number",
+      "default": 0,
+      "description": "Listener count when the stream ended"
+    },
+    "total_messages": {
+      "type": "number",
+      "default": 0,
+      "description": "Total chat messages and voice memos during the stream"
+    },
+    "total_tips": {
+      "type": "number",
+      "default": 0,
+      "description": "Total tips received during the stream"
+    },
+    "listener_snapshots": {
+      "type": "string",
+      "description": "JSON array of {offset, count} data points for charting listener activity over time"
+    }
+  },
+  "required": [
+    "artist_name",
+    "stream_title",
+    "stream_mode",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "Credit Alert Notifier",
+  "description": "Daily check of all call credit balances and billing cycle end dates. Creates AppNotification alerts for users with low credits or upcoming subscription renewals.",
+  "trigger": {
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "timezone": "America/Los_Angeles",
+      "one_time_date": null,
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    },
+    "condition": null
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "credit_alert_notifier",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "check_credits": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkCreditAlerts"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Check credit balances & renewals",
+            "description": "Creates low-credit and renewal alerts"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "name": "InstructorProfile",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the instructor this profile belongs to. One profile per instructor."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Instructor display name shown on the profile page and course covers"
+    },
+    "headline": {
+      "type": "string",
+      "description": "Short role/title tagline under the name (e.g. 'Senior AI Engineer \u00b7 12 yrs')"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 3000,
+      "description": "Full biography shown on the instructor profile page"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "specializations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Areas of expertise shown as chips"
+    },
+    "credentials": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Certifications and credentials"
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Professional experience timeline entries"
+    }
+  },
+  "required": [
+    "owner_user_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

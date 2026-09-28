@@ -1,0 +1,83 @@
+{
+  "name": "FoodInquiry",
+  "type": "object",
+  "properties": {
+    "food_id": {
+      "type": "string",
+      "description": "FoodListing this inquiry is about"
+    },
+    "food_title": {
+      "type": "string",
+      "description": "Denormalized food listing title for display"
+    },
+    "buyer_name": {
+      "type": "string",
+      "description": "Name of the customer"
+    },
+    "buyer_phone": {
+      "type": "string",
+      "description": "Customer contact number"
+    },
+    "buyer_email": {
+      "type": "string",
+      "description": "Optional customer email"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional message to the vendor"
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "order",
+        "reserve",
+        "info"
+      ],
+      "default": "order",
+      "description": "What the customer wants \u2014 place an order, reserve a table, or more info"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "closed"
+      ],
+      "default": "new",
+      "description": "Vendor/admin follow-up status"
+    }
+  },
+  "required": [
+    "food_id",
+    "buyer_name",
+    "buyer_phone"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "ServiceRating",
+  "type": "object",
+  "properties": {
+    "rating_type": {
+      "type": "string",
+      "enum": [
+        "food",
+        "transport"
+      ],
+      "description": "Which kind of experience is being rated \u2014 a food order or a transport booking"
+    },
+    "related_order_id": {
+      "type": "string",
+      "description": "ID of the FoodOrder or TransportBooking this rating is linked to (empty for anonymous voice ratings)"
+    },
+    "related_call_sid": {
+      "type": "string",
+      "description": "Twilio CallSid of the voice call the rating was captured on"
+    },
+    "caller_phone": {
+      "type": "string",
+      "description": "Phone number of the customer who left the rating (for voice-captured ratings)"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 0,
+      "description": "Numeric score from 1 to 5 (5 = best). 0 when the caller's speech didn't contain a clear number."
+    },
+    "comment": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Short comment summarizing what the customer said, parsed from their spoken words or typed in-app"
+    },
+    "voice_transcript": {
+      "type": "string",
+      "description": "Raw transcribed speech the rating was captured from (empty for in-app typed ratings)"
+    }
+  },
+  "required": [
+    "rating_type",
+    "score"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

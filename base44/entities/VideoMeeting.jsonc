@@ -1,0 +1,89 @@
+{
+  "name": "VideoMeeting",
+  "type": "object",
+  "properties": {
+    "room_code": {
+      "type": "string",
+      "description": "Unique shareable code for joining this meeting room"
+    },
+    "host_name": {
+      "type": "string",
+      "description": "Display name of the meeting host"
+    },
+    "host_user_id": {
+      "type": "string",
+      "description": "User ID of the meeting host"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "ended"
+      ],
+      "default": "active",
+      "description": "Whether the meeting is currently live or has ended"
+    },
+    "participant_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "User IDs of all current participants in the meeting"
+    },
+    "participant_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Display names of all current participants"
+    },
+    "is_free": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this meeting is free (all video meetings are free)"
+    },
+    "max_participants": {
+      "type": "number",
+      "default": 12,
+      "description": "Maximum number of simultaneous participants"
+    }
+  },
+  "required": [
+    "room_code",
+    "host_name",
+    "host_user_id",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

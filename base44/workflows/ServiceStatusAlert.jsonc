@@ -1,0 +1,40 @@
+{
+  "name": "Service Status Active Alert",
+  "description": "Sends a customized SMS to a member when their ServiceRequest transitions from a pending state to active (status becomes action_needed)",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ServiceRequest",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status == \"action_needed\" and .trigger.old_data.status != \"action_needed\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "service_status_active_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendServiceStatusAlert",
+            "args": {
+              "request_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send status SMS",
+            "description": "Notify member their request is now active"
+          }
+        }
+      }
+    ]
+  }
+}

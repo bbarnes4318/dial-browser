@@ -1,0 +1,75 @@
+{
+  "name": "DatingLike",
+  "type": "object",
+  "properties": {
+    "liker_profile_id": {
+      "type": "string",
+      "description": "ID of the DatingProfile that issued the like"
+    },
+    "liker_name": {
+      "type": "string",
+      "description": "Display name of the liker (denormalized for display)"
+    },
+    "liked_profile_id": {
+      "type": "string",
+      "description": "ID of the DatingProfile being liked"
+    },
+    "liked_name": {
+      "type": "string",
+      "description": "Display name of the liked profile (denormalized for display)"
+    },
+    "matched": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this like resulted in a mutual match (the other member also liked back)"
+    },
+    "matched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the mutual match was detected"
+    },
+    "rating_request_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the post-meetup rating request SMS was last sent for this match. Used by the Meetup Rating Followup workflow to avoid duplicate prompts."
+    }
+  },
+  "required": [
+    "liker_profile_id",
+    "liked_profile_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

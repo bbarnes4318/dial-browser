@@ -1,0 +1,45 @@
+{
+  "name": "Scheduled Messages Dispatcher",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "scheduled_messages_dispatcher",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "dispatch_messages": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendScheduledMessages",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send due scheduled messages",
+            "description": "Dispatches all due SMS/email messages"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 15,
+      "interval_unit": "minutes",
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Checks every 15 minutes for scheduled SMS/email messages that are due and sends them to contacts, then creates delivery alert notifications."
+}

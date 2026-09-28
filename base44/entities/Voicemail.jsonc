@@ -1,0 +1,113 @@
+{
+  "name": "Voicemail",
+  "type": "object",
+  "properties": {
+    "caller_phone": {
+      "type": "string",
+      "description": "Phone number of the caller who left the voicemail"
+    },
+    "caller_name": {
+      "type": "string",
+      "description": "Identified name of the caller"
+    },
+    "recipient_dial_code": {
+      "type": "string",
+      "description": "The personal Dial Browser number that received the voicemail"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "URL of the voicemail audio recording"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Transcribed text from the voicemail audio"
+    },
+    "duration_sec": {
+      "type": "number",
+      "description": "Voicemail length in seconds"
+    },
+    "call_type": {
+      "type": "string",
+      "enum": [
+        "contact",
+        "unknown",
+        "blocked",
+        "spam"
+      ],
+      "default": "unknown",
+      "description": "Caller type at the time the voicemail was left"
+    },
+    "related_call_id": {
+      "type": "string",
+      "description": "Reference to the IncomingCall record if applicable"
+    },
+    "listened": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient has played this voicemail"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient starred this voicemail"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member who owns this voicemail. Set for service-role-created voicemails (e.g. automated booking voice confirmations) so the owning member can read, mark listened, pin, and delete it; empty for voicemails created under a user session (which are owned via created_by_id)."
+    }
+  },
+  "required": [
+    "caller_phone",
+    "recipient_dial_code"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

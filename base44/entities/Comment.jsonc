@@ -1,0 +1,84 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "user_post",
+        "podcast",
+        "live_stream",
+        "artist_track"
+      ],
+      "default": "user_post",
+      "description": "What type of content this comment belongs to"
+    },
+    "content_id": {
+      "type": "string",
+      "description": "ID or slug of the post, podcast episode, live stream, or artist track this comment is attached to"
+    },
+    "content_title": {
+      "type": "string",
+      "description": "Title of the parent content (denormalized for display)"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name of the commenter"
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "The comment text"
+    },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "ID of the parent comment if this is a reply (empty for top-level comments)"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a host or moderator pinned this comment"
+    },
+    "is_host": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the commenter is the host or creator of the content"
+    }
+  },
+  "required": [
+    "content_type",
+    "content_id",
+    "author_name",
+    "body"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

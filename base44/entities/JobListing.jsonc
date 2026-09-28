@@ -1,0 +1,99 @@
+{
+  "name": "JobListing",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company posting the job"
+    },
+    "field": {
+      "type": "string",
+      "enum": [
+        "Technology",
+        "Telecom",
+        "Marketing",
+        "Design",
+        "Hardware",
+        "Sales",
+        "Logistics",
+        "Community",
+        "Accessibility",
+        "General"
+      ],
+      "default": "General",
+      "description": "Job field category for matching subscribers"
+    },
+    "location": {
+      "type": "string",
+      "description": "Job location (city, remote, etc.)"
+    },
+    "pay": {
+      "type": "string",
+      "description": "Salary or pay range"
+    },
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "Full-Time",
+        "Part-Time",
+        "Contract"
+      ],
+      "default": "Full-Time",
+      "description": "Employment type"
+    },
+    "dial_code": {
+      "type": "string",
+      "description": "Dial code to apply for this job"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the listing is currently active"
+    },
+    "alert_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether SMS alerts have been sent to matching subscribers"
+    }
+  },
+  "required": [
+    "title",
+    "company",
+    "field",
+    "job_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "description": "Sends an SMS receipt to the caller whenever a callback booking is finalized through the Dial Browser",
+  "name": "Booking Receipt Notifier",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "booking_receipt_notifier",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_receipt": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendBookingReceipt",
+            "args": {
+              "callback_request_id": "${ .trigger.entity_id }",
+              "provider_name": "${ .trigger.data.provider_name }",
+              "caller_name": "${ .trigger.data.caller_name }",
+              "caller_phone": "${ .trigger.data.caller_phone }",
+              "service_needed": "${ .trigger.data.service_needed }",
+              "preferred_time": "${ .trigger.data.preferred_time }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send booking SMS receipt",
+            "description": "Creates an SMS receipt for the caller"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CallbackRequest"
+    }
+  }
+}

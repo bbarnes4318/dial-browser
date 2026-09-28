@@ -1,0 +1,80 @@
+{
+  "name": "PromoCode",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "The promo code string users enter at checkout (validated case-insensitively, stored uppercase)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable label for the discount shown to the user (e.g. '10% off your first month')"
+    },
+    "discount_type": {
+      "type": "string",
+      "enum": [
+        "percent",
+        "fixed"
+      ],
+      "description": "Whether the discount is a percentage off or a fixed dollar amount off"
+    },
+    "discount_value": {
+      "type": "number",
+      "description": "The discount amount \u2014 percentage (1-100) for 'percent' type, or dollars for 'fixed' type"
+    },
+    "max_uses": {
+      "type": "number",
+      "description": "Maximum total times this code can be redeemed (0 or null = unlimited)"
+    },
+    "used_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this code has been redeemed at checkout"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the promo code expires and can no longer be used (null = never expires)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this promo code is currently active and redeemable"
+    },
+    "applicable_plans": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Which plan/product codes this promo applies to (empty array = valid for all purchases)"
+    }
+  },
+  "required": [
+    "code",
+    "discount_type",
+    "discount_value"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

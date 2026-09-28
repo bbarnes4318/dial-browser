@@ -1,0 +1,92 @@
+{
+  "name": "ContactInquiry",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the person submitting the inquiry"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address to reply to"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Optional phone number the submitter provided"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Short subject line summarizing the inquiry"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "general",
+        "support",
+        "billing",
+        "partnership",
+        "press",
+        "technical",
+        "feedback",
+        "other"
+      ],
+      "default": "general",
+      "description": "Category of the contact inquiry for routing to the right team"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Full body of the inquiry message"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
+      "default": "new",
+      "description": "Current handling status of the inquiry"
+    },
+    "submitter_user_id": {
+      "type": "string",
+      "description": "User ID of the logged-in member who submitted (empty for anonymous visitors)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "contact_page",
+        "footer_link",
+        "other"
+      ],
+      "default": "contact_page",
+      "description": "Where the inquiry was submitted from"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "subject",
+    "message"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

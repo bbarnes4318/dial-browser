@@ -1,0 +1,88 @@
+{
+  "name": "EmployerAccess",
+  "type": "object",
+  "properties": {
+    "employer_name": {
+      "type": "string",
+      "description": "Name of the employer requesting applicant access"
+    },
+    "employer_email": {
+      "type": "string",
+      "description": "Email address of the employer (used for checkout and matching)"
+    },
+    "job_listing_id": {
+      "type": "string",
+      "description": "Reference to the JobListing whose applicants are being unlocked"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Title of the job (denormalized for display)"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company name (denormalized)"
+    },
+    "access_granted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether payment was completed and applicant access is unlocked"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID for webhook correlation"
+    },
+    "price_paid": {
+      "type": "number",
+      "default": 9.99,
+      "description": "Amount paid to unlock applicant access"
+    }
+  },
+  "required": [
+    "employer_name",
+    "employer_email",
+    "job_listing_id",
+    "job_title",
+    "company"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

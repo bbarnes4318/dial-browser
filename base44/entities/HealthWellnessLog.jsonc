@@ -1,0 +1,93 @@
+{
+  "name": "HealthWellnessLog",
+  "type": "object",
+  "properties": {
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "symptom",
+        "followup"
+      ],
+      "default": "symptom",
+      "description": "Whether this is an initial symptom inquiry or a follow-up question about a symptom"
+    },
+    "symptom": {
+      "type": "string",
+      "description": "The main symptom described by the member"
+    },
+    "question": {
+      "type": "string",
+      "description": "The follow-up question asked (empty for initial symptom entries)"
+    },
+    "urgency_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "moderate",
+        "high",
+        "emergency"
+      ],
+      "description": "AI-estimated urgency from the TeleMedical flow (not a diagnosis)"
+    },
+    "possible_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Topics the AI suggested raising with a clinician"
+    },
+    "recommended_action": {
+      "type": "string",
+      "description": "General wellness guidance returned by the TeleMedical flow"
+    },
+    "home_remedies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "General self-care notes returned by the TeleMedical flow"
+    },
+    "see_doctor_within": {
+      "type": "string",
+      "description": "AI-suggested timeframe to consider visiting a licensed provider"
+    }
+  },
+  "required": [
+    "entry_type",
+    "symptom"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/30 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "voice_call_auto_transcription",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "transcribe_calls": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoTranscribeCalls",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Transcribe voice calls",
+            "description": "Auto-transcribe calls missing transcripts"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Periodically transcribes voice calls that have audio recordings but no stored transcript, ensuring all completed calls have searchable text records.",
+  "name": "Voice Call Auto-Transcription"
+}

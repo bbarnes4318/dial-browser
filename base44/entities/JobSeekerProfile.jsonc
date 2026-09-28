@@ -1,0 +1,93 @@
+{
+  "name": "JobSeekerProfile",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Job seeker's full name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number for contact and SMS job alerts"
+    },
+    "email": {
+      "type": "string",
+      "description": "Optional email address"
+    },
+    "desired_location": {
+      "type": "string",
+      "description": "City or region where the seeker prefers to work"
+    },
+    "experience_years": {
+      "type": "number",
+      "description": "Years of professional experience"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of skills (e.g. JavaScript, SEO, Forklift)"
+    },
+    "work_history": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Summary of previous work experience"
+    },
+    "resume_url": {
+      "type": "string",
+      "description": "URL of the uploaded resume file"
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the seeker completed the onboarding flow"
+    }
+  },
+  "required": [
+    "full_name",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "name": "BroadcastTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the reusable broadcast script template"
+    },
+    "message_text": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Pre-filled message text applied when the template is loaded"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "Optional pre-recorded audio URL attached to the template"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Duration of the template's attached audio in seconds"
+    },
+    "target_audience": {
+      "type": "string",
+      "enum": [
+        "all",
+        "medical",
+        "dental",
+        "real_estate",
+        "construction",
+        "grocery",
+        "weather",
+        "music",
+        "jobs",
+        "bill_payment",
+        "marketplace"
+      ],
+      "default": "all",
+      "description": "Default target audience applied when the template is loaded"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "all",
+        "northeast",
+        "southeast",
+        "midwest",
+        "southwest",
+        "west",
+        "national"
+      ],
+      "default": "all",
+      "description": "Default region filter applied when the template is loaded"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

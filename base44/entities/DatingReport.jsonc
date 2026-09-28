@@ -1,0 +1,81 @@
+{
+  "name": "DatingReport",
+  "type": "object",
+  "properties": {
+    "reported_profile_id": {
+      "type": "string",
+      "description": "ID of the DatingProfile being reported for inappropriate behavior"
+    },
+    "reported_name": {
+      "type": "string",
+      "description": "Display name of the reported member (denormalized for the admin review panel)"
+    },
+    "reported_by_id": {
+      "type": "string",
+      "description": "ID of the DatingProfile owned by the reporting member"
+    },
+    "reported_by_name": {
+      "type": "string",
+      "description": "Display name of the reporting member (denormalized for the admin review panel)"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "inappropriate_photo",
+        "harassment",
+        "fake_profile",
+        "spam",
+        "underage",
+        "other"
+      ],
+      "default": "other",
+      "description": "Category of the reported behavior"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional details from the reporter about the inappropriate behavior"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "dismissed",
+        "actioned"
+      ],
+      "default": "pending",
+      "description": "Admin review status of the report \u2014 pending until an admin reviews it"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the admin marked the report as reviewed, dismissed, or actioned"
+    }
+  },
+  "required": [
+    "reported_profile_id",
+    "reported_name",
+    "reason"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

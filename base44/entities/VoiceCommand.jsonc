@@ -1,0 +1,94 @@
+{
+  "name": "VoiceCommand",
+  "type": "object",
+  "properties": {
+    "command_text": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "The raw voice command or search query spoken into the Dial Browser"
+    },
+    "service_category": {
+      "type": "string",
+      "description": "The service category detected from the command (e.g. Medical, Music, Weather, Jobs, Grocery, Construction)"
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "search",
+        "book",
+        "call",
+        "navigate",
+        "play",
+        "purchase",
+        "other"
+      ],
+      "default": "search",
+      "description": "The detected intent behind the voice command"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "voice",
+        "text",
+        "dial_code"
+      ],
+      "default": "voice",
+      "description": "How the command was entered"
+    },
+    "region": {
+      "type": "string",
+      "description": "Geographic region or city inferred from the command for activity mapping"
+    },
+    "audio_clarity_rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 0,
+      "description": "User-rated audio clarity score from 0 (unrated) to 5 (crystal clear)"
+    }
+  },
+  "required": [
+    "command_text"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

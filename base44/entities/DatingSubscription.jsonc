@@ -1,0 +1,86 @@
+{
+  "name": "DatingSubscription",
+  "type": "object",
+  "properties": {
+    "tier": {
+      "type": "string",
+      "enum": [
+        "free",
+        "plus",
+        "elite"
+      ],
+      "default": "free",
+      "description": "Dating subscription tier: free (5 likes/day), plus (unlimited likes + see who liked you + voice intros), elite (priority matching + advanced filters + read receipts)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "canceled",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "pending = checkout started but payment not yet confirmed; active = paid and currently granting tier benefits; canceled/expired = no longer granting benefits"
+    },
+    "checkout_session_id": {
+      "type": "string",
+      "description": "Wix checkout session ID correlating the purchase to the granted tier"
+    },
+    "subscription_id": {
+      "type": "string",
+      "description": "Wix subscription contract ID \u2014 stored on order_approved so cancel/expire webhooks can revoke access. Empty until payment is confirmed."
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current subscription tier became active"
+    }
+  },
+  "required": [
+    "tier"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

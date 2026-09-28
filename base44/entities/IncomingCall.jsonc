@@ -1,0 +1,103 @@
+{
+  "name": "IncomingCall",
+  "type": "object",
+  "properties": {
+    "caller_phone": {
+      "type": "string",
+      "description": "Phone number of the incoming caller"
+    },
+    "caller_name": {
+      "type": "string",
+      "description": "Identified name of the caller (from contacts or reverse lookup)"
+    },
+    "recipient_dial_code": {
+      "type": "string",
+      "description": "The personal Dial Browser number that received the call"
+    },
+    "caller_location": {
+      "type": "string",
+      "description": "Geographic location derived from the caller's area code"
+    },
+    "call_type": {
+      "type": "string",
+      "enum": [
+        "contact",
+        "unknown",
+        "blocked",
+        "spam"
+      ],
+      "default": "unknown",
+      "description": "Whether the caller is a known contact, unknown, blocked, or flagged spam"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ringing",
+        "answered",
+        "missed",
+        "declined"
+      ],
+      "default": "ringing",
+      "description": "Current state of the incoming call"
+    },
+    "duration_sec": {
+      "type": "number",
+      "description": "Call duration in seconds if answered"
+    },
+    "identified_by": {
+      "type": "string",
+      "description": "How the caller was identified: contact list, reverse lookup, or area code"
+    },
+    "created_by_id": {
+      "type": "string",
+      "description": "The member who received the call"
+    }
+  },
+  "required": [
+    "caller_phone",
+    "recipient_dial_code",
+    "call_type",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

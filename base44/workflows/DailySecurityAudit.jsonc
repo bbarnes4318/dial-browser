@@ -1,0 +1,45 @@
+{
+  "name": "Daily Security Audit",
+  "description": "Runs a comprehensive security and integrity audit every day at 8:00 AM EST \u2014 checks all entities, AI engine, cleans up orphaned records, fixes data inconsistencies, and emails a detailed report to admin users",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_security_audit",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_security_audit": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runDailySecurityAudit",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run Daily Security Audit",
+            "description": "Audit all systems, fix issues, email report"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

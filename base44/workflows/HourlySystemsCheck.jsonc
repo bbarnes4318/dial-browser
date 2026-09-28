@@ -1,0 +1,45 @@
+{
+  "name": "Hourly Systems Check",
+  "description": "Runs a complete systems health check every hour on the hour \u2014 verifies all entities, AI engine, and core infrastructure are operational",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "hourly_systems_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_health_check": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "systemHealthCheck",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run Systems Health Check",
+            "description": "Check all entities, AI, and infrastructure"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

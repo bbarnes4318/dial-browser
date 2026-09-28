@@ -1,0 +1,86 @@
+{
+  "name": "StudyStreak",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the learner this streak belongs to. One record per learner."
+    },
+    "current_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Consecutive days with at least one study activity (lesson or quiz). Resets to 1 when a day is skipped."
+    },
+    "longest_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Highest consecutive-day streak the learner has ever reached"
+    },
+    "last_activity_date": {
+      "type": "string",
+      "description": "YYYY-MM-DD (UTC) of the most recent day with study activity. Used to detect gaps and extend or reset the streak."
+    },
+    "total_active_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Total distinct days the learner has studied, across all time"
+    },
+    "total_lessons_completed": {
+      "type": "number",
+      "default": 0,
+      "description": "Lifetime count of lessons advanced (one per lesson delivery)"
+    },
+    "total_quizzes_passed": {
+      "type": "number",
+      "default": 0,
+      "description": "Lifetime count of quizzes/tests/exams passed"
+    },
+    "unlocked_milestones": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [],
+      "description": "Streak-day milestones the learner has unlocked (3, 7, 14, 30, 60, 100). Each unlocks a digital badge."
+    }
+  },
+  "required": [
+    "owner_user_id"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

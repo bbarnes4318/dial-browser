@@ -1,0 +1,66 @@
+{
+  "name": "FaqEntry",
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "The FAQ question callers see and search for"
+    },
+    "answer": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "The answer spoken aloud via TTS and shown as text in the Voice FAQ flow"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "getting_started",
+        "services",
+        "pricing",
+        "devices",
+        "dial_codes",
+        "privacy",
+        "other"
+      ],
+      "default": "getting_started",
+      "description": "Grouping used by the searchable Voice FAQ flow filter chips"
+    },
+    "dial_code": {
+      "type": "string",
+      "description": "Optional relevant dial code (e.g. *200#) announced at the end of the answer and shown as a badge"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this entry is visible to callers in the Voice FAQ flow"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Lower numbers appear first in the Voice FAQ flow"
+    }
+  },
+  "required": [
+    "question",
+    "answer",
+    "category"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

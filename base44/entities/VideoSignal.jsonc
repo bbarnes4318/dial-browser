@@ -1,0 +1,92 @@
+{
+  "name": "VideoSignal",
+  "type": "object",
+  "properties": {
+    "room_code": {
+      "type": "string",
+      "description": "The meeting room code this signal belongs to"
+    },
+    "from_user_id": {
+      "type": "string",
+      "description": "User ID of the signal sender"
+    },
+    "from_user_name": {
+      "type": "string",
+      "description": "Display name of the signal sender"
+    },
+    "to_user_id": {
+      "type": "string",
+      "description": "User ID of the intended signal recipient"
+    },
+    "signal_type": {
+      "type": "string",
+      "enum": [
+        "offer",
+        "answer",
+        "ice"
+      ],
+      "description": "Type of WebRTC signaling message"
+    },
+    "sdp": {
+      "type": "string",
+      "description": "Session Description Protocol payload for offer/answer signals"
+    },
+    "candidate": {
+      "type": "string",
+      "description": "JSON-encoded ICE candidate for ice signals"
+    }
+  },
+  "required": [
+    "room_code",
+    "from_user_id",
+    "to_user_id",
+    "signal_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.from_user_id": "{{user.id}}"
+        },
+        {
+          "data.to_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

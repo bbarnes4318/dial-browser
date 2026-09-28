@@ -1,0 +1,95 @@
+{
+  "name": "EmergencyContact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the emergency contact"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number to receive the distress SMS"
+    },
+    "relationship": {
+      "type": "string",
+      "enum": [
+        "Family",
+        "Friend",
+        "Spouse",
+        "Doctor",
+        "Neighbor",
+        "Caregiver",
+        "Other"
+      ],
+      "default": "Other",
+      "description": "Relationship to the member"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the primary emergency contact"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this contact should receive distress alerts"
+    },
+    "address": {
+      "type": "string",
+      "description": "Home or base location address for map display"
+    },
+    "location_lat": {
+      "type": "number",
+      "description": "Latitude of the contact's saved location for map display"
+    },
+    "location_lng": {
+      "type": "number",
+      "description": "Longitude of the contact's saved location for map display"
+    }
+  },
+  "required": [
+    "name",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

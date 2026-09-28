@@ -1,0 +1,120 @@
+{
+  "name": "TransportBooking",
+  "type": "object",
+  "properties": {
+    "call_sid": {
+      "type": "string",
+      "description": "Twilio CallSid used as the voice-session key while the booking is being built over the phone"
+    },
+    "caller_phone": {
+      "type": "string",
+      "description": "Phone number of the member placing the booking (used for delivery contact and SMS receipts)"
+    },
+    "trip_type": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "intercity"
+      ],
+      "default": "scheduled",
+      "description": "scheduled = pre-booked car/taxi pickup for a specific time; intercity = bus, train, or flight ticket between cities"
+    },
+    "origin": {
+      "type": "string",
+      "description": "Pickup location or departure city spoken by the member"
+    },
+    "destination": {
+      "type": "string",
+      "description": "Drop-off address or destination city for the trip"
+    },
+    "pickup_time": {
+      "type": "string",
+      "description": "Requested pickup time or departure date/time spoken by the member (free text, normalized by the voice flow)"
+    },
+    "provider_name": {
+      "type": "string",
+      "description": "Aggregator/carrier name for the selected option (denormalized for voice read-back and SMS)"
+    },
+    "vehicle_class_or_carrier": {
+      "type": "string",
+      "description": "Vehicle class for scheduled pickups (e.g. sedan, SUV) or carrier name for intercity tickets (e.g. Greyhound, Amtrak, Delta)"
+    },
+    "fare": {
+      "type": "number",
+      "default": 0,
+      "description": "Quoted fare in USD, read back to the member during the call and charged via Base44 Payments"
+    },
+    "aggregator_booking_id": {
+      "type": "string",
+      "description": "Booking id returned by the travel aggregator once the seat/ride is confirmed"
+    },
+    "confirmation_code": {
+      "type": "string",
+      "description": "Short code read to the member and sent via SMS once the booking is placed with the aggregator"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "placed",
+        "confirmed",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Lifecycle status of the transport booking"
+    },
+    "checkout_session_id": {
+      "type": "string",
+      "description": "Wix checkout session id correlating the Base44 Payments charge to this booking (set before the member pays)"
+    },
+    "related_purchase_id": {
+      "type": "string",
+      "description": "Optional reference to the Base44Purchase record backing the payment"
+    }
+  },
+  "required": [
+    "caller_phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

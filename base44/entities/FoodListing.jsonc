@@ -1,0 +1,119 @@
+{
+  "name": "FoodListing",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title, e.g. 'Margherita Wood-Fired Pizza'"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "restaurant",
+        "grocery",
+        "meal_kit",
+        "catering",
+        "bakery",
+        "farm"
+      ],
+      "description": "Food category for the Dial Foods filter tabs"
+    },
+    "cuisine": {
+      "type": "string",
+      "description": "Cuisine or food style (Italian, Mexican, Bakery, Produce, etc.)"
+    },
+    "price": {
+      "type": "number",
+      "description": "Representative price in USD (avg meal or item price)"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Price unit, e.g. 'per meal', 'per box', 'per dozen', 'per lb'"
+    },
+    "dietary_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "vegetarian",
+          "vegan",
+          "gluten_free",
+          "halal",
+          "kosher",
+          "organic"
+        ]
+      },
+      "default": [],
+      "description": "Dietary tags a listing satisfies, used by the dietary filter"
+    },
+    "city": {
+      "type": "string",
+      "description": "City where the food vendor is located"
+    },
+    "state": {
+      "type": "string",
+      "description": "State / region"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Optional photo URL. Empty uses a generated gradient cover."
+    },
+    "vendor_name": {
+      "type": "string",
+      "description": "Restaurant, store, or producer name"
+    },
+    "vendor_phone": {
+      "type": "string",
+      "description": "Contact number for the vendor"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Short listing description"
+    },
+    "rating": {
+      "type": "number",
+      "default": 0,
+      "description": "Average rating 0-5 (0 = no rating yet)"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Surfaced in the featured row"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "closed"
+      ],
+      "default": "available",
+      "description": "Availability status \u2014 only 'available' listings show in the marketplace"
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "price",
+    "city",
+    "state"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

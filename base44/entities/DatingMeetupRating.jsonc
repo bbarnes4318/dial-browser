@@ -1,0 +1,62 @@
+{
+  "name": "DatingMeetupRating",
+  "type": "object",
+  "properties": {
+    "match_id": {
+      "type": "string",
+      "description": "ID of the DatingLike (mutual match) this rating refers to"
+    },
+    "rated_profile_id": {
+      "type": "string",
+      "description": "ID of the DatingProfile being rated"
+    },
+    "rated_name": {
+      "type": "string",
+      "description": "Display name of the rated member (denormalized for the admin panel)"
+    },
+    "rater_profile_id": {
+      "type": "string",
+      "description": "ID of the DatingProfile owned by the rater"
+    },
+    "rater_name": {
+      "type": "string",
+      "description": "Display name of the rater (denormalized for the admin panel)"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Star rating 1-5 given by the rater after meeting up"
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional written feedback from the rater about how the meetup went"
+    }
+  },
+  "required": [
+    "match_id",
+    "rated_profile_id",
+    "rating"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

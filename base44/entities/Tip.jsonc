@@ -1,0 +1,82 @@
+{
+  "name": "Tip",
+  "type": "object",
+  "properties": {
+    "artist_name": {
+      "type": "string",
+      "description": "Name of the artist receiving the tip"
+    },
+    "track_id": {
+      "type": "string",
+      "description": "ID of the ArtistTrack the tip is associated with"
+    },
+    "track_title": {
+      "type": "string",
+      "description": "Title of the track (denormalized for display)"
+    },
+    "tipper_name": {
+      "type": "string",
+      "description": "Display name of the person sending the tip"
+    },
+    "tipper_email": {
+      "type": "string",
+      "description": "Email of the tipper (used for payment receipt)"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0.5,
+      "description": "Tip amount in USD"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional message from the tipper to the artist"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "completed",
+      "description": "Payment status of the tip"
+    }
+  },
+  "required": [
+    "artist_name",
+    "tipper_name",
+    "tipper_email",
+    "amount"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

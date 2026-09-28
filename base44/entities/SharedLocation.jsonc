@@ -1,0 +1,124 @@
+{
+  "name": "SharedLocation",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member sharing their location"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Denormalized display name of the sender"
+    },
+    "owner_avatar": {
+      "type": "string",
+      "description": "Denormalized avatar URL of the sender"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "snap"
+      ],
+      "default": "snap",
+      "description": "live = continuous tracking while page open; snap = one-time position ping"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latest latitude of the shared position"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Latest longitude of the shared position"
+    },
+    "accuracy": {
+      "type": "number",
+      "default": 0,
+      "description": "GPS accuracy in meters"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When coordinates were last refreshed"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the share auto-expires (live: chosen duration; snap: 1 hour)"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 60,
+      "description": "Chosen live duration in minutes (15/30/60); 60 for snap"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked",
+        "expired"
+      ],
+      "default": "active",
+      "description": "Lifecycle of the share session"
+    },
+    "recipient_type": {
+      "type": "string",
+      "enum": [
+        "friend",
+        "emergency"
+      ],
+      "default": "friend",
+      "description": "Which contact list the share was sent to"
+    },
+    "recipient_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of recipients invited to this share"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "mode"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

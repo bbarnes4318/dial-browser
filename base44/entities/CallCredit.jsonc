@@ -1,0 +1,88 @@
+{
+  "name": "CallCredit",
+  "type": "object",
+  "properties": {
+    "plan_tier": {
+      "type": "string",
+      "enum": [
+        "free",
+        "plus",
+        "premium",
+        "elite",
+        "ultimate"
+      ],
+      "default": "free",
+      "description": "Subscription tier determining the monthly AI credit allocation"
+    },
+    "total_credits": {
+      "type": "number",
+      "default": 25,
+      "description": "Total AI credits allocated for the current billing cycle (free=25, plus=300, premium=800, elite=2000, ultimate=5000)"
+    },
+    "used_credits": {
+      "type": "number",
+      "default": 0,
+      "description": "AI credits consumed in the current billing cycle"
+    },
+    "billing_cycle_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start date of the current billing cycle"
+    },
+    "billing_cycle_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End date of the current billing cycle (when credits reset)"
+    },
+    "bonus_credits": {
+      "type": "number",
+      "default": 0,
+      "description": "Additional credits purchased or awarded on top of the plan allocation"
+    }
+  },
+  "required": [
+    "plan_tier",
+    "total_credits"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

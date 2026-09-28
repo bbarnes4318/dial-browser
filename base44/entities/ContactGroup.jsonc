@@ -1,0 +1,79 @@
+{
+  "name": "ContactGroup",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the group (e.g. Family, Soccer Team, Clients)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional short description of the group"
+    },
+    "member_contact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Contact record ids that belong to this group. Resolved to phone numbers at send / call time."
+    },
+    "member_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Denormalized count of members for quick display"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Free-form labels (e.g. industry, region) used to quickly filter groups when selecting a broadcast audience"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "name": "VoiceVerification",
+  "type": "object",
+  "properties": {
+    "passphrase": {
+      "type": "string",
+      "description": "The unique passphrase the user speaks to verify their identity"
+    },
+    "voice_sample_url": {
+      "type": "string",
+      "description": "URL of the enrolled voice recording stored via UploadFile"
+    },
+    "enrolled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has completed voice enrollment"
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last successful voice verification"
+    },
+    "verification_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of successful voice verifications"
+    },
+    "voiceprint_signature": {
+      "type": "string",
+      "description": "JSON-encoded 32-dim spectral voiceprint vector for local biometric comparison"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User's email for lookup during voice login"
+    },
+    "login_secret": {
+      "type": "string",
+      "description": "Password used after successful voice verification for passwordless login"
+    }
+  },
+  "required": [
+    "passphrase"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "name": "SmsCalendarSubscription",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User ID of the SMS Calendar subscriber"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Display name of the subscriber"
+    },
+    "subscription_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the paid SMS Calendar subscription is active"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "annual"
+      ],
+      "default": "monthly",
+      "description": "Billing plan for the SMS Calendar subscription"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID for webhook correlation"
+    },
+    "subscription_id": {
+      "type": "string",
+      "description": "Wix subscription contract ID for cancel/expire matching"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "canceled",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Current lifecycle status of the subscription"
+    },
+    "messages_sent_this_cycle": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of scheduled messages sent in the current billing cycle"
+    }
+  },
+  "required": [
+    "owner_user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

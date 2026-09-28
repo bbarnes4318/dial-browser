@@ -1,0 +1,113 @@
+{
+  "name": "Reminder",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short title for the reminder or voice note"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Task description or text content the user wants to be reminded about"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "URL of the voice note audio recording"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Transcribed text from the voice note audio"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "followup",
+        "voice_note"
+      ],
+      "default": "voice_note",
+      "description": "Whether this is a follow-up to a saved consultation or a standalone voice note"
+    },
+    "related_interaction_id": {
+      "type": "string",
+      "description": "Reference to the VoiceInteraction record if this is a follow-up reminder"
+    },
+    "related_interaction_title": {
+      "type": "string",
+      "description": "Denormalized title of the related consultation for display"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the SMS reminder should be sent to the user"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number to receive the SMS reminder"
+    },
+    "sms_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the automated SMS reminder has been sent"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user marked this task as done"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Topic tags for categorization"
+    }
+  },
+  "required": [
+    "title",
+    "source",
+    "due_date",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

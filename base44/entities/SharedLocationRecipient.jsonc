@@ -1,0 +1,158 @@
+{
+  "name": "SharedLocationRecipient",
+  "type": "object",
+  "properties": {
+    "shared_location_id": {
+      "type": "string",
+      "description": "ID of the SharedLocation this recipient belongs to"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the sender \u2014 so the sender can read their own recipient rows"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Denormalized sender display name"
+    },
+    "owner_avatar": {
+      "type": "string",
+      "description": "Denormalized sender avatar URL"
+    },
+    "recipient_user_id": {
+      "type": "string",
+      "description": "User id of the friend recipient (for in-app consent). Empty for emergency contacts reached by SMS magic-link."
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Display name of the recipient (friend handle or emergency contact name)"
+    },
+    "recipient_contact_id": {
+      "type": "string",
+      "description": "EmergencyContact record id when recipient_type is emergency"
+    },
+    "recipient_phone": {
+      "type": "string",
+      "description": "Phone number for emergency contacts (used to send the SMS magic-link invite)"
+    },
+    "recipient_type": {
+      "type": "string",
+      "enum": [
+        "friend",
+        "emergency"
+      ],
+      "default": "friend",
+      "description": "Which contact list this recipient came from"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "snap"
+      ],
+      "default": "snap",
+      "description": "Mirror of the parent share mode"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Denormalized latest latitude so recipients can read coordinates from their own row"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Denormalized latest longitude"
+    },
+    "accuracy": {
+      "type": "number",
+      "default": 0,
+      "description": "Denormalized GPS accuracy in meters"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Denormalized coordinate refresh timestamp"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Denormalized share expiry"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked",
+        "expired"
+      ],
+      "default": "active",
+      "description": "Mirror of the parent share lifecycle"
+    },
+    "accepted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient has accepted the share (consent). Coordinates are only visible to the recipient after this is true."
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the recipient accepted"
+    },
+    "declined": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient explicitly declined the share"
+    }
+  },
+  "required": [
+    "shared_location_id",
+    "owner_user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

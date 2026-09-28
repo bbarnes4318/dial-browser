@@ -1,0 +1,99 @@
+{
+  "name": "VoiceHost",
+  "type": "object",
+  "properties": {
+    "host_name": {
+      "type": "string",
+      "description": "Display name of the voice service host"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Short biography describing the host's background and expertise"
+    },
+    "headshot_url": {
+      "type": "string",
+      "description": "URL of the host's profile headshot image"
+    },
+    "category": {
+      "type": "string",
+      "description": "Primary category the host covers (e.g. Travel, Health, Entertainment)"
+    },
+    "hosted_service_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of dial service IDs this host operates"
+    },
+    "hosted_shows": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of show or segment names the host presents"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number for the host"
+    },
+    "social_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of social media profile URLs"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the host is verified on the platform"
+    },
+    "years_active": {
+      "type": "number",
+      "description": "Years of experience hosting"
+    },
+    "total_listeners_reached": {
+      "type": "number",
+      "default": 0,
+      "description": "Cumulative listener count across all hosted services"
+    }
+  },
+  "required": [
+    "host_name",
+    "category"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

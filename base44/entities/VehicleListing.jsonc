@@ -1,0 +1,125 @@
+{
+  "name": "VehicleListing",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title, e.g. '2023 Tesla Model 3'"
+    },
+    "make": {
+      "type": "string",
+      "description": "Manufacturer (Toyota, Ford, Tesla, etc.)"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model name"
+    },
+    "year": {
+      "type": "number",
+      "description": "Model year"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "car",
+        "suv",
+        "boat",
+        "motorcycle"
+      ],
+      "description": "Vehicle category for the Dial Motors filter tabs"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "new",
+        "used"
+      ],
+      "description": "New or used"
+    },
+    "fuel": {
+      "type": "string",
+      "enum": [
+        "gas",
+        "hybrid",
+        "electric"
+      ],
+      "description": "Powertrain"
+    },
+    "price": {
+      "type": "number",
+      "description": "Asking price in USD"
+    },
+    "mileage": {
+      "type": "number",
+      "default": 0,
+      "description": "Odometer miles (0 for new / boats)"
+    },
+    "city": {
+      "type": "string",
+      "description": "City where the vehicle is located"
+    },
+    "state": {
+      "type": "string",
+      "description": "State / region / country"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Optional photo URL. Empty uses a generated gradient cover."
+    },
+    "dealer_name": {
+      "type": "string",
+      "description": "Selling dealership or private seller name"
+    },
+    "dealer_phone": {
+      "type": "string",
+      "description": "Contact number for the seller"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Short listing description"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Surfaced in the featured row"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "pending",
+        "sold"
+      ],
+      "default": "available",
+      "description": "Sale status \u2014 only 'available' listings show in the marketplace"
+    }
+  },
+  "required": [
+    "title",
+    "make",
+    "model",
+    "type",
+    "condition",
+    "fuel",
+    "price"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

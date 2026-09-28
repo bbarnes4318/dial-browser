@@ -1,0 +1,94 @@
+{
+  "name": "Trade",
+  "type": "object",
+  "properties": {
+    "listing_id": {
+      "type": "string",
+      "description": "Reference to the marketplace listing"
+    },
+    "listing_title": {
+      "type": "string",
+      "description": "Title of the traded item (denormalized for display)"
+    },
+    "seller_name": {
+      "type": "string",
+      "description": "Name of the selling member"
+    },
+    "buyer_name": {
+      "type": "string",
+      "description": "Name of the buying member"
+    },
+    "trade_type": {
+      "type": "string",
+      "enum": [
+        "sale",
+        "trade"
+      ],
+      "description": "Whether the transaction was a sale or a trade"
+    },
+    "price": {
+      "type": "number",
+      "description": "Final agreed transaction price in USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "cancelled"
+      ],
+      "default": "completed",
+      "description": "Current status of the trade"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Feedback rating from 1 to 5 stars"
+    },
+    "review_text": {
+      "type": "string",
+      "description": "Optional written feedback from the buyer"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the trade was completed"
+    }
+  },
+  "required": [
+    "listing_title",
+    "seller_name",
+    "buyer_name",
+    "trade_type",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

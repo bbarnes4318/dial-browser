@@ -1,0 +1,72 @@
+{
+  "name": "ListenerBadge",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member who earned this badge"
+    },
+    "badge_type": {
+      "type": "string",
+      "enum": [
+        "genre",
+        "milestone"
+      ],
+      "description": "Whether this badge is for completing a genre or hitting a listening milestone"
+    },
+    "badge_key": {
+      "type": "string",
+      "description": "Stable identifier, e.g. 'genre:Comedy' or 'milestone:first_finish'"
+    },
+    "badge_name": {
+      "type": "string",
+      "description": "Display name of the badge"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of how the badge is earned"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji shown on the badge"
+    },
+    "unlocked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the badge was earned"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "badge_type",
+    "badge_key",
+    "badge_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

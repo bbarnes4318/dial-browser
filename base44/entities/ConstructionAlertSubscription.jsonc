@@ -1,0 +1,103 @@
+{
+  "name": "ConstructionAlertSubscription",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Name of the person requesting contractor availability alerts"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number to receive SMS alerts when a matching contractor becomes available"
+    },
+    "specialty": {
+      "type": "string",
+      "enum": [
+        "general_contracting",
+        "roofing",
+        "plumbing",
+        "electrical",
+        "hvac",
+        "flooring",
+        "painting",
+        "demolition",
+        "excavation",
+        "framing",
+        "concrete",
+        "remodeling",
+        "new_construction",
+        "renovation",
+        "landscaping",
+        "drywall",
+        "masonry",
+        "solar_installation"
+      ],
+      "description": "The construction specialty the subscriber wants alerts for"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "all",
+        "northeast",
+        "southeast",
+        "midwest",
+        "southwest",
+        "west",
+        "national"
+      ],
+      "default": "all",
+      "description": "Regional filter for nearby contractor alerts"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the subscription is currently receiving alerts"
+    }
+  },
+  "required": [
+    "full_name",
+    "phone",
+    "specialty"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "name": "ShowShare",
+  "type": "object",
+  "properties": {
+    "show_title": {
+      "type": "string",
+      "description": "Title of the podcast or show being offered for share purchase"
+    },
+    "creator_name": {
+      "type": "string",
+      "description": "Name of the creator who owns the show"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "podcast",
+        "video_series",
+        "audio_series",
+        "live_show"
+      ],
+      "default": "podcast",
+      "description": "Type of show content"
+    },
+    "subscriber_count": {
+      "type": "number",
+      "description": "Current subscriber count (must be 1,000,000+ to qualify)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Description of the show and what share ownership includes"
+    },
+    "total_shares": {
+      "type": "number",
+      "description": "Total number of shares available for this show"
+    },
+    "shares_sold": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of shares already purchased by the public"
+    },
+    "price_per_share": {
+      "type": "number",
+      "minimum": 0.5,
+      "description": "Price per individual share in USD"
+    },
+    "revenue_share_percent": {
+      "type": "number",
+      "description": "Percentage of show revenue each share represents"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "sold_out",
+        "closed",
+        "pending_review"
+      ],
+      "default": "pending_review",
+      "description": "Current listing status of the show share offering"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of the show cover artwork"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID for webhook correlation"
+    },
+    "pending_shares": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of shares reserved in a pending checkout \u2014 applied to shares_sold only when payment is confirmed by the webhook"
+    }
+  },
+  "required": [
+    "show_title",
+    "creator_name",
+    "subscriber_count",
+    "total_shares",
+    "price_per_share",
+    "revenue_share_percent"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

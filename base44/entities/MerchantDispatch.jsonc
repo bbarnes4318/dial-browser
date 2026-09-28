@@ -1,0 +1,88 @@
+{
+  "name": "MerchantDispatch",
+  "type": "object",
+  "properties": {
+    "merchant_name": {
+      "type": "string",
+      "description": "Name of the restaurant or small-business merchant enrolled in phone-in order dispatch"
+    },
+    "public_phone": {
+      "type": "string",
+      "description": "The merchant's existing published phone number that customers call and forward to the 1 Call Away order line"
+    },
+    "dispatch_webhook_url": {
+      "type": "string",
+      "description": "Webhook URL the structured order is POSTed to so it lands in the merchant's digital order queue"
+    },
+    "webhook_secret": {
+      "type": "string",
+      "description": "Per-merchant secret used to HMAC-SHA256 sign dispatched order payloads so the merchant can verify authenticity"
+    },
+    "cancel_sms_number": {
+      "type": "string",
+      "description": "Staff phone number that receives the 60-second cancel-window SMS for each fired order"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this merchant is active and accepting dispatched orders"
+    },
+    "staff_online": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the merchant's staff are currently available to accept phone-in orders. When false, the voice order flow tells callers the merchant isn't accepting orders right now."
+    },
+    "forward_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the merchant has confirmed they forwarded their existing line to the 1 Call Away order line"
+    }
+  },
+  "required": [
+    "merchant_name",
+    "public_phone",
+    "dispatch_webhook_url",
+    "cancel_sms_number"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

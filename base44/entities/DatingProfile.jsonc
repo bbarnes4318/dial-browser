@@ -1,0 +1,360 @@
+{
+  "name": "DatingProfile",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Display name shown on the dating profile"
+    },
+    "age": {
+      "type": "number",
+      "minimum": 18,
+      "description": "Age of the member (must be 18+)"
+    },
+    "location": {
+      "type": "string",
+      "description": "City / area the member is based in"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "man",
+        "woman",
+        "nonbinary",
+        "other"
+      ],
+      "description": "Gender identity of the member"
+    },
+    "looking_for": {
+      "type": "string",
+      "enum": [
+        "relationship",
+        "casual",
+        "friendship",
+        "other"
+      ],
+      "default": "relationship",
+      "description": "What kind of connection the member is seeking"
+    },
+    "voice_greeting": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Short voice-message text others hear (spoken via TTS) when browsing the profile \u2014 used as a fallback when no recorded voice intro exists"
+    },
+    "voice_intro_url": {
+      "type": "string",
+      "description": "URL of the member's recorded 30-second voice intro clip. Played directly on the profile so matches can hear the real voice. Empty when only the TTS text greeting is used."
+    },
+    "voice_intro_duration": {
+      "type": "number",
+      "default": 0,
+      "description": "Duration of the recorded voice intro in seconds (capped at 30)"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional longer bio about the member"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number used to deliver the match SMS and to verify the member's identity. Kept private, never shown to other members."
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Primary profile photo URL (first entry of photos). Kept for backward compatibility with older clients."
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Ordered list of the member's uploaded profile photo URLs (up to 6). photos[0] is the cover/avatar."
+    },
+    "height": {
+      "type": "string",
+      "enum": [
+        "under_5ft",
+        "5_0_to_5_3",
+        "5_4_to_5_7",
+        "5_8_to_5_11",
+        "6_0_plus",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Height range from the standard dating questionnaire"
+    },
+    "body_type": {
+      "type": "string",
+      "enum": [
+        "slim",
+        "athletic",
+        "average",
+        "curvy",
+        "plus_size",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Body type from the standard dating questionnaire"
+    },
+    "education": {
+      "type": "string",
+      "enum": [
+        "high_school",
+        "some_college",
+        "associates",
+        "bachelors",
+        "masters",
+        "doctorate",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Highest education level from the standard dating questionnaire"
+    },
+    "occupation": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Member's occupation (free text)"
+    },
+    "drinking": {
+      "type": "string",
+      "enum": [
+        "never",
+        "rarely",
+        "socially",
+        "often",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Drinking habit from the standard dating questionnaire"
+    },
+    "smoking": {
+      "type": "string",
+      "enum": [
+        "never",
+        "sometimes",
+        "often",
+        "quit",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Smoking habit from the standard dating questionnaire"
+    },
+    "kids": {
+      "type": "string",
+      "enum": [
+        "no_kids",
+        "has_kids",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Whether the member already has kids"
+    },
+    "want_kids": {
+      "type": "string",
+      "enum": [
+        "want_kids",
+        "dont_want_kids",
+        "open_to_it",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Whether the member wants kids in the future"
+    },
+    "religion": {
+      "type": "string",
+      "enum": [
+        "christian",
+        "muslim",
+        "jewish",
+        "hindu",
+        "buddhist",
+        "atheist",
+        "agnostic",
+        "spiritual",
+        "other",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Religion / faith from the standard dating questionnaire"
+    },
+    "ethnicity": {
+      "type": "string",
+      "enum": [
+        "black",
+        "white",
+        "latino",
+        "asian",
+        "middle_eastern",
+        "native_american",
+        "mixed",
+        "other",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Ethnicity from the standard dating questionnaire"
+    },
+    "zodiac": {
+      "type": "string",
+      "enum": [
+        "aries",
+        "taurus",
+        "gemini",
+        "cancer",
+        "leo",
+        "virgo",
+        "libra",
+        "scorpio",
+        "sagittarius",
+        "capricorn",
+        "aquarius",
+        "pisces",
+        "prefer_not_to_say"
+      ],
+      "default": "prefer_not_to_say",
+      "description": "Zodiac sign from the standard dating questionnaire"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "music",
+          "sports",
+          "travel",
+          "cooking",
+          "gaming",
+          "reading",
+          "fitness",
+          "art",
+          "movies",
+          "hiking",
+          "tech",
+          "fashion",
+          "photography",
+          "dancing",
+          "yoga"
+        ]
+      },
+      "default": [],
+      "description": "Selected hobbies / interests from the standard dating questionnaire (multi-select). Used for shared-interest matching in the dating portal."
+    },
+    "music_genres": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "hip_hop",
+          "electronic",
+          "jazz",
+          "rnb",
+          "pop",
+          "rock",
+          "ambient",
+          "country",
+          "world",
+          "indie",
+          "lofi",
+          "experimental"
+        ]
+      },
+      "default": [],
+      "description": "Member's top music genres selected as tags for shared-taste matching in the dating portal (up to 5)."
+    },
+    "email_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has verified their email via the one-time code."
+    },
+    "verification_code": {
+      "type": "string",
+      "description": "Hashed one-time email verification code (stored briefly until verified)"
+    },
+    "verification_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email verification code was last emailed (used for expiry / rate-limit)"
+    },
+    "verification_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "Failed email verification attempts for the current code. Locks out further attempts after the limit is reached; reset to 0 when a new code is requested or the email is verified."
+    },
+    "phone_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has confirmed their phone number via SMS. Required (along with email_verified) for the profile to become active and visible to other members."
+    },
+    "phone_verification_code": {
+      "type": "string",
+      "description": "Hashed one-time SMS phone-verification code (stored briefly until verified)"
+    },
+    "phone_verification_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the phone verification code was last sent via SMS (used for expiry / rate-limit)"
+    },
+    "phone_verification_send_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of verification SMS sends within the current calendar day. Reset to 0 when a new calendar day begins. Caps daily SMS to prevent SMS-bombing abuse."
+    },
+    "phone_verification_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "Failed verification attempts for the current code. Locks out further attempts after the limit is reached; reset to 0 when a new code is requested."
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this profile is visible to other members browsing. Set to true only after BOTH email and phone verification complete."
+    },
+    "last_portal_visit": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the member's last visit to the dating portal or dashboard. Used by the match-engagement reminder workflow to detect inactive members with new matches."
+    },
+    "last_reminder_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last match-engagement SMS reminder was sent to this member. Rate-limits reminders to one per 48 hours per member."
+    }
+  },
+  "required": [
+    "full_name",
+    "age",
+    "location",
+    "phone",
+    "voice_greeting"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

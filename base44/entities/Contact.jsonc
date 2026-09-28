@@ -1,0 +1,98 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the contact"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number or email-as-phone address used to reach this contact"
+    },
+    "contact_type": {
+      "type": "string",
+      "enum": [
+        "phone",
+        "email_phone"
+      ],
+      "default": "phone",
+      "description": "Whether this contact is a regular phone number or an email-as-phone address"
+    },
+    "email": {
+      "type": "string",
+      "description": "Optional email address for the contact"
+    },
+    "company": {
+      "type": "string",
+      "description": "Optional company or organization name"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about this contact"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "personal",
+        "work",
+        "service",
+        "emergency",
+        "other"
+      ],
+      "default": "personal",
+      "description": "Category for grouping contacts"
+    },
+    "favorite": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this contact is starred for quick access"
+    }
+  },
+  "required": [
+    "name",
+    "phone",
+    "contact_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

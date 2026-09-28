@@ -1,0 +1,146 @@
+{
+  "name": "ConstructionProvider",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Name of the construction company or contractor"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "residential",
+        "commercial",
+        "both"
+      ],
+      "default": "both",
+      "description": "Whether the provider handles residential, commercial, or both"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "general_contracting",
+          "roofing",
+          "plumbing",
+          "electrical",
+          "hvac",
+          "flooring",
+          "painting",
+          "demolition",
+          "excavation",
+          "framing",
+          "concrete",
+          "remodeling",
+          "new_construction",
+          "renovation",
+          "landscaping",
+          "drywall",
+          "masonry",
+          "solar_installation"
+        ]
+      },
+      "default": [],
+      "description": "Construction specialties this provider offers"
+    },
+    "city": {
+      "type": "string",
+      "description": "City where the provider is based"
+    },
+    "state": {
+      "type": "string",
+      "description": "US state where the provider operates"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "northeast",
+        "southeast",
+        "midwest",
+        "southwest",
+        "west",
+        "national"
+      ],
+      "default": "national",
+      "description": "Regional operating area"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number for the provider"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 0,
+      "description": "Average rating from 0 to 5"
+    },
+    "review_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of customer reviews"
+    },
+    "licensed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the provider is licensed and insured"
+    },
+    "years_active": {
+      "type": "number",
+      "description": "Years the company has been in business"
+    },
+    "dial_code": {
+      "type": "string",
+      "description": "1 Call Away dial code to reach this provider"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Short description of the company and services"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this provider is currently accepting new projects"
+    }
+  },
+  "required": [
+    "company_name",
+    "service_type",
+    "city",
+    "state"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

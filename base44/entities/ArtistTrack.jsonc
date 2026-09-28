@@ -1,0 +1,146 @@
+{
+  "name": "ArtistTrack",
+  "type": "object",
+  "properties": {
+    "track_title": {
+      "type": "string",
+      "description": "Name of the song, beat, or track"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Stage name of the artist who created the track"
+    },
+    "genre": {
+      "type": "string",
+      "enum": [
+        "Hip-Hop",
+        "Electronic",
+        "Jazz",
+        "R&B",
+        "Pop",
+        "Rock",
+        "Ambient",
+        "Country",
+        "World",
+        "Indie",
+        "Lo-Fi",
+        "Experimental"
+      ],
+      "default": "Electronic",
+      "description": "Primary genre for radio station matching"
+    },
+    "bpm": {
+      "type": "number",
+      "description": "Beats per minute the track was produced at"
+    },
+    "synth_type": {
+      "type": "string",
+      "description": "Synthesizer waveform used (sine, square, sawtooth, triangle)"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Estimated duration of the recorded melody in seconds"
+    },
+    "beat_pattern": {
+      "type": "string",
+      "description": "JSON string of the step sequencer pattern (padId -> active steps array)"
+    },
+    "recorded_notes": {
+      "type": "string",
+      "description": "JSON string of recorded synth/melody events for playback"
+    },
+    "vocal_recording_url": {
+      "type": "string",
+      "description": "URL of the artist's recorded vocal/lyrics audio file"
+    },
+    "lyrics": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Written lyrics for the track"
+    },
+    "sample_file_url": {
+      "type": "string",
+      "description": "URL of an uploaded production sample or loop file"
+    },
+    "has_vocals": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this track includes recorded vocals, making it a complete song"
+    },
+    "album_name": {
+      "type": "string",
+      "description": "Name of the album this track belongs to (empty for singles)"
+    },
+    "track_number": {
+      "type": "number",
+      "description": "Position of this track within its album"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional description or notes from the artist"
+    },
+    "artwork_url": {
+      "type": "string",
+      "description": "URL of optional cover artwork image"
+    },
+    "radio_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "pending",
+        "live"
+      ],
+      "default": "not_submitted",
+      "description": "Whether the track has been submitted to the radio network and is live"
+    },
+    "play_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times listeners have tuned in to this track on the radio"
+    },
+    "share_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times listeners have shared this track"
+    },
+    "created_by_name": {
+      "type": "string",
+      "description": "Display name of the user who created the track"
+    }
+  },
+  "required": [
+    "track_title",
+    "artist_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

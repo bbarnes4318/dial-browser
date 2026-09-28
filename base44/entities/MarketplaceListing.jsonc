@@ -1,0 +1,98 @@
+{
+  "name": "MarketplaceListing",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the listing"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what is being offered"
+    },
+    "listing_type": {
+      "type": "string",
+      "enum": [
+        "sale",
+        "trade"
+      ],
+      "default": "sale",
+      "description": "Whether the item is for sale or for trade"
+    },
+    "price": {
+      "type": "number",
+      "description": "Asking price in USD (if for sale)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "realestate",
+        "vehicles",
+        "electronics",
+        "jobs",
+        "services",
+        "other"
+      ],
+      "default": "other",
+      "description": "Listing category"
+    },
+    "location": {
+      "type": "string",
+      "description": "Where the item is located"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL of the uploaded listing photo"
+    },
+    "seller_name": {
+      "type": "string",
+      "description": "Name of the member listing the item"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "sold",
+        "traded",
+        "removed"
+      ],
+      "default": "active",
+      "description": "Current status of the listing"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "listing_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

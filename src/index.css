@@ -1,0 +1,277 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+@layer base {
+  :root {
+    --sidebar-w: 256px;
+    --background: 220 33% 3%;
+    --foreground: 240 5% 96%;
+    --card: 220 24% 9%;
+    --card-foreground: 240 5% 96%;
+    --popover: 220 24% 9%;
+    --popover-foreground: 240 5% 96%;
+    --primary: 76 100% 57%;
+    --primary-foreground: 220 33% 3%;
+    --secondary: 220 24% 9%;
+    --secondary-foreground: 240 5% 96%;
+    --muted: 220 10% 18%;
+    --muted-foreground: 220 6% 56%;
+    --accent: 76 100% 57%;
+    --accent-foreground: 220 33% 3%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 10% 15%;
+    --input: 220 10% 15%;
+    --ring: 76 100% 57%;
+    --chart-1: 76 100% 57%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --sidebar-background: 220 33% 3%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 76 100% 57%;
+    --sidebar-primary-foreground: 220 33% 3%;
+    --sidebar-accent: 220 24% 9%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 220 10% 15%;
+    --sidebar-ring: 76 100% 57%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+
+  /* Copyright / copy protection — disable text & image selection/dragging app-wide */
+  html, body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input, textarea, select, [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+  img, video {
+    -webkit-user-drag: none;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #05070A;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1FF26;
+  border-radius: 2px;
+}
+
+/* Scroll container — no snap trapping, smooth natural scroll */
+.snap-container {
+  overflow-y: visible;
+  min-height: auto;
+}
+.snap-section {
+  min-height: auto;
+}
+
+/* Smooth scroll for anchor links — desktop only to avoid mobile touch issues */
+@media (min-width: 769px) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Contain scroll on mobile — prevents bounce-back without blocking smooth scroll */
+html, body {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improved focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #D1FF26;
+  outline-offset: 2px;
+}
+
+/* Prevent zoom on iOS inputs */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Touch optimization — remove tap highlight and double-tap zoom delay */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on tap for UI elements */
+button, nav, [role="button"], .no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth touch scrolling on mobile */
+@media (max-width: 768px) {
+  body {
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Ensure adequate touch target sizes */
+  button, a[role="button"], .touch-target {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* Signal line pulse animation */
+@keyframes signalPulse {
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.12; }
+}
+
+/* Data packet traveling down a signal line */
+@keyframes dataTransmit {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+/* Data packet traveling upward */
+@keyframes dataTransmitReverse {
+  0% { top: 110%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: -10%; opacity: 0; }
+}
+
+/* Signal flicker — brief brightness spike */
+@keyframes signalFlicker {
+  0%, 100% { opacity: 0.04; }
+  47% { opacity: 0.04; }
+  50% { opacity: 0.18; }
+  53% { opacity: 0.04; }
+}
+
+/* Waveform animation */
+@keyframes waveFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Focus converge animation */
+@keyframes converge {
+  0% { opacity: 0; transform: scale(1.5); }
+  100% { opacity: 0.3; transform: scale(1); }
+}
+
+/* Ticker scroll */
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Emergency button pulse — expanding neon rings */
+@keyframes emergencyPulse {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+/* Equalizer bar bounce */
+@keyframes eqBar {
+  0%, 100% { height: 20%; }
+  50% { height: 100%; }
+}
+
+/* Radar sweep rotation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Holographic globe — continuous 3D Y-axis rotation */
+@keyframes globeSpin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+/* Arc flow animation */
+@keyframes arcFlow {
+  to { stroke-dashoffset: -24; }
+}
+
+/* Dot pulse */
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.3; r: 1.5; }
+  50% { opacity: 1; r: 2.5; }
+}
+
+/* Map marker — expanding glow ring for demand markers */
+@keyframes demandPulse {
+  0%, 100% { transform: scale(1); opacity: 0.25; }
+  50% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Globe continent sweep — two-copy seamless horizontal loop for a rotating Earth */
+@keyframes globeSweep {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-284px); }
+}
+
+/* Phosphor Pulse — glowing concentric expansion for success states */
+@keyframes phosphorPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); box-shadow: 0 0 20px rgba(209,255,38,0.05); }
+  50% { opacity: 1; transform: scale(1.05); box-shadow: 0 0 40px rgba(209,255,38,0.15); }
+}
+
+/* Region map tooltips — dark HUD styling for Leaflet */
+.region-map .leaflet-tooltip {
+  background: rgba(5,7,10,0.92);
+  border: 0.5px solid rgba(209,255,38,0.4);
+  color: #D1FF26;
+  box-shadow: 0 0 16px rgba(209,255,38,0.15);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.region-map .leaflet-tooltip-top::before,
+.region-map .leaflet-tooltip-bottom::before,
+.region-map .leaflet-tooltip-left::before,
+.region-map .leaflet-tooltip-right::before {
+  display: none;
+}

@@ -1,0 +1,77 @@
+{
+  "name": "AudiobookPurchase",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member who purchased this audiobook"
+    },
+    "audiobook_id": {
+      "type": "string",
+      "description": "Audiobook record id that was purchased"
+    },
+    "audiobook_title": {
+      "type": "string",
+      "description": "Denormalized audiobook title for display"
+    },
+    "price_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Price charged at purchase time (denormalized from Audiobook.price)"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session id linking this purchase to a confirmed payment. Set by create-checkout (service role) and only a non-empty value here proves the row was fulfilled by the wix-payments-webhook \u2014 a client-writable row with status 'paid' is NOT proof of payment."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid"
+      ],
+      "default": "pending",
+      "description": "pending = checkout created but payment not yet confirmed; paid = payment confirmed and the full download is unlocked. Only the wix-payments-webhook (service role) ever sets 'paid'."
+    },
+    "purchased_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When payment was confirmed and the audiobook unlocked"
+    }
+  },
+  "required": [
+    "audiobook_id",
+    "owner_user_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

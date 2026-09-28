@@ -1,0 +1,111 @@
+{
+  "name": "Member",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Member's full name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Member's primary phone number for voice/SMS access"
+    },
+    "backup_phone": {
+      "type": "string",
+      "description": "Member's secondary/backup phone number"
+    },
+    "location": {
+      "type": "string",
+      "description": "Member's city or region"
+    },
+    "voice_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member completed voice verification"
+    },
+    "connected_service": {
+      "type": "string",
+      "description": "First service connected during onboarding"
+    },
+    "service_dial_code": {
+      "type": "string",
+      "description": "Dial code for the connected service"
+    },
+    "member_dial_code": {
+      "type": "string",
+      "description": "Assigned member dial code"
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether onboarding was completed"
+    },
+    "receive_calls_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has opted in to receive incoming calls on their personal Dial Browser number"
+    },
+    "personal_email": {
+      "type": "string",
+      "description": "Personal email address assigned to the member (paid feature)"
+    },
+    "email_subscription_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has an active paid subscription for personal email"
+    },
+    "voicemail_greeting_url": {
+      "type": "string",
+      "description": "URL of the custom voicemail greeting audio file uploaded or recorded by the member"
+    },
+    "dial_browser_greeting_url": {
+      "type": "string",
+      "description": "URL of the member's custom Dial Browser greeting audio \u2014 played when they connect to the Dial Browser"
+    }
+  },
+  "required": [
+    "full_name",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

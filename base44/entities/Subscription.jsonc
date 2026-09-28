@@ -1,0 +1,116 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User ID of the subscriber"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Display name of the subscriber"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Email of the subscriber"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "plus",
+        "premium",
+        "elite",
+        "ultimate"
+      ],
+      "description": "Subscription tier level"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "annual"
+      ],
+      "default": "monthly",
+      "description": "Billing cycle"
+    },
+    "subscription_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the subscription is currently active"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "canceled",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Current status of the subscription"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID for webhook correlation"
+    },
+    "subscription_id": {
+      "type": "string",
+      "description": "Wix subscription contract ID"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "tier",
+    "plan"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

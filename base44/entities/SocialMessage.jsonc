@@ -1,0 +1,103 @@
+{
+  "name": "SocialMessage",
+  "type": "object",
+  "properties": {
+    "sender_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile that sent the message"
+    },
+    "recipient_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile receiving the message"
+    },
+    "recipient_user_id": {
+      "type": "string",
+      "description": "User id of the recipient \u2014 used for row-level read access so the recipient can see messages sent to them"
+    },
+    "sender_handle": {
+      "type": "string",
+      "description": "Denormalized handle of the sender"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Denormalized display name of the sender"
+    },
+    "sender_avatar": {
+      "type": "string",
+      "description": "Denormalized avatar URL of the sender"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Text body of the private message (empty for voice-only messages)"
+    },
+    "voice_note_url": {
+      "type": "string",
+      "description": "URL of a voice message audio clip"
+    },
+    "voice_note_transcript": {
+      "type": "string",
+      "description": "Auto-generated transcript of the voice message"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient has opened/read this message"
+    }
+  },
+  "required": [
+    "sender_profile_id",
+    "recipient_profile_id",
+    "recipient_user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

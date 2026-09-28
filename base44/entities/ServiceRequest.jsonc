@@ -1,0 +1,99 @@
+{
+  "name": "ServiceRequest",
+  "type": "object",
+  "properties": {
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "medical",
+        "dental",
+        "real_estate"
+      ],
+      "description": "Which 1 Call service the request belongs to"
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Name of the person submitting the request"
+    },
+    "requester_phone": {
+      "type": "string",
+      "description": "Phone number for follow-up contact"
+    },
+    "details": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "The symptoms, dental issue, or property search criteria the user submitted"
+    },
+    "location": {
+      "type": "string",
+      "description": "Location for real estate or provider search requests"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "ai_processing",
+        "in_review",
+        "action_needed",
+        "completed"
+      ],
+      "default": "submitted",
+      "description": "Current status of the service request"
+    },
+    "ai_notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Guidance or notes from the AI analysis of the request"
+    },
+    "ai_urgency": {
+      "type": "string",
+      "description": "AI-assessed urgency level (e.g. low, moderate, high, emergency)"
+    }
+  },
+  "required": [
+    "service_type",
+    "requester_name",
+    "details"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

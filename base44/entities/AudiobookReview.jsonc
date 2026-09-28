@@ -1,0 +1,63 @@
+{
+  "name": "AudiobookReview",
+  "type": "object",
+  "properties": {
+    "audiobook_id": {
+      "type": "string",
+      "description": "Audiobook being reviewed"
+    },
+    "audiobook_title": {
+      "type": "string",
+      "description": "Denormalized audiobook title for display"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Star rating from 1 to 5"
+    },
+    "comment": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Listener feedback / review text"
+    },
+    "reviewer_name": {
+      "type": "string",
+      "description": "Denormalized display name of the reviewer"
+    }
+  },
+  "required": [
+    "audiobook_id",
+    "rating"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

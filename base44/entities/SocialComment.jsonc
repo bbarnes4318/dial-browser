@@ -1,0 +1,80 @@
+{
+  "name": "SocialComment",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the SocialPost being commented on"
+    },
+    "author_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile that authored the comment"
+    },
+    "author_handle": {
+      "type": "string",
+      "description": "Denormalized handle of the comment author"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Denormalized display name of the comment author"
+    },
+    "author_avatar": {
+      "type": "string",
+      "description": "Denormalized avatar URL of the comment author"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Text body of the comment (empty for voice-only comments)"
+    },
+    "voice_note_url": {
+      "type": "string",
+      "description": "URL of the voice comment audio"
+    },
+    "voice_note_transcript": {
+      "type": "string",
+      "description": "Auto-generated transcript of the voice comment"
+    },
+    "like_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of likes on this comment"
+    }
+  },
+  "required": [
+    "post_id",
+    "author_profile_id",
+    "author_handle",
+    "author_name"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

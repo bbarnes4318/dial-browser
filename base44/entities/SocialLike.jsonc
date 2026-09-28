@@ -1,0 +1,45 @@
+{
+  "name": "SocialLike",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the SocialPost that was liked"
+    },
+    "liker_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile that issued the like"
+    },
+    "liker_handle": {
+      "type": "string",
+      "description": "Denormalized handle of the liker"
+    }
+  },
+  "required": [
+    "post_id",
+    "liker_profile_id"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

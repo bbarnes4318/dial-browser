@@ -1,0 +1,135 @@
+{
+  "name": "PhoneEntitlement",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member this phone entitlement belongs to"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "free",
+        "plus",
+        "premium",
+        "elite",
+        "ultimate"
+      ],
+      "default": "free",
+      "description": "Subscription tier governing the monthly softphone cap"
+    },
+    "cap_minutes_monthly": {
+      "type": "number",
+      "default": 30,
+      "description": "Free monthly outbound call minutes included (free tier = 30, paid tiers = 500)"
+    },
+    "cap_sms_monthly": {
+      "type": "number",
+      "default": 20,
+      "description": "Free monthly outbound SMS included (free tier = 20, paid tiers = 500)"
+    },
+    "minutes_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Call minutes consumed in the current billing cycle (per-minute rounding)"
+    },
+    "sms_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Outbound SMS consumed in the current billing cycle"
+    },
+    "cycle_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the current billing cycle"
+    },
+    "cycle_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of the current billing cycle (when the cap resets)"
+    },
+    "topup_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Extra call minutes purchased via a top-up credit pack"
+    },
+    "topup_sms": {
+      "type": "number",
+      "default": 0,
+      "description": "Extra outbound SMS purchased via a top-up credit pack"
+    },
+    "disclaimer_acknowledged": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has accepted the one-time non-emergency (no 911) disclaimer"
+    },
+    "disclaimer_acknowledged_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the member accepted the non-emergency disclaimer"
+    },
+    "has_personal_number": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has been provisioned a personal Dial number (paid tiers only)"
+    },
+    "low_credit_alerted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last low-credit alert notification was fired. Used by the low-credit notifier workflow to avoid spamming more than once per 24h."
+    },
+    "low_credit_threshold_pct": {
+      "type": "number",
+      "default": 10,
+      "minimum": 5,
+      "maximum": 50,
+      "description": "Percentage of remaining monthly call/text balance below which a low-credit alert fires. Member-configurable (5-50). Default 10%."
+    },
+    "call_forwarding_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether paid members have call forwarding on. When true, inbound calls to their Dial number are routed to forward_to_number instead of ringing the softphone."
+    },
+    "forward_to_number": {
+      "type": "string",
+      "description": "Secondary phone number (E.164) that inbound calls are forwarded to when call_forwarding_enabled is true. Paid members only."
+    }
+  },
+  "required": [
+    "owner_user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

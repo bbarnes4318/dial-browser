@@ -1,0 +1,93 @@
+{
+  "name": "PhoneCallRating",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member who left this post-call rating"
+    },
+    "related_call_id": {
+      "type": "string",
+      "description": "Optional PhoneCall record id this rating is linked to"
+    },
+    "remote_number": {
+      "type": "string",
+      "description": "The other party's number for this rated call"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound"
+      ],
+      "default": "outbound",
+      "description": "Whether the rated call was placed by the member or received"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 5,
+      "description": "Quality score from 1 to 5 (5 = excellent)"
+    },
+    "voice_note_url": {
+      "type": "string",
+      "description": "URL of the member's recorded voice-note feedback clip"
+    },
+    "voice_note_duration": {
+      "type": "number",
+      "default": 0,
+      "description": "Duration of the voice note in seconds"
+    },
+    "comment": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional text comment accompanying the rating"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "score"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

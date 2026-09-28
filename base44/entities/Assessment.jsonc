@@ -1,0 +1,96 @@
+{
+  "name": "Assessment",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string",
+      "description": "Course this assessment belongs to"
+    },
+    "title": {
+      "type": "string",
+      "description": "Assessment title (e.g. Module 1 Quiz, Midterm Test, Final Exam)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "quiz",
+        "test",
+        "exam"
+      ],
+      "description": "quiz = short check, test = midterm, exam = final certification exam"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this assessment covers"
+    },
+    "passing_score_pct": {
+      "type": "number",
+      "default": 70,
+      "description": "Minimum percentage score to pass"
+    },
+    "time_limit_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Time limit in minutes (0 = no limit). Exams are typically timed."
+    },
+    "retake_cap": {
+      "type": "number",
+      "default": 3,
+      "description": "Maximum number of attempts allowed"
+    },
+    "order_index": {
+      "type": "number",
+      "default": 0,
+      "description": "Order of this assessment within the course flow"
+    },
+    "weight": {
+      "type": "number",
+      "default": 1,
+      "description": "Relative weight contributing to the final grade"
+    }
+  },
+  "required": [
+    "course_id",
+    "title",
+    "type"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

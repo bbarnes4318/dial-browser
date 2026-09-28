@@ -1,0 +1,143 @@
+{
+  "name": "AdvertiseInquiry",
+  "type": "object",
+  "properties": {
+    "business_name": {
+      "type": "string",
+      "description": "Name of the business or brand applying to advertise"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact person name"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Contact email address"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "website": {
+      "type": "string",
+      "description": "Business website URL"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Primary industry or vertical"
+    },
+    "budget_range": {
+      "type": "string",
+      "enum": [
+        "under_1k",
+        "1k_5k",
+        "5k_25k",
+        "25k_100k",
+        "100k_plus"
+      ],
+      "default": "under_1k",
+      "description": "Estimated monthly ad budget range"
+    },
+    "campaign_goal": {
+      "type": "string",
+      "enum": [
+        "brand_awareness",
+        "app_installs",
+        "lead_gen",
+        "sales",
+        "foot_traffic"
+      ],
+      "default": "brand_awareness",
+      "description": "Primary advertising objective"
+    },
+    "target_regions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Selected target geographic regions for the campaign"
+    },
+    "preferred_channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "voice_ads",
+          "sms_broadcast",
+          "radio_spot",
+          "dating_sponsor",
+          "social_feed",
+          "audiobook_pre_roll"
+        ]
+      },
+      "default": [],
+      "description": "Ad inventory channels the advertiser wants to use"
+    },
+    "start_timeline": {
+      "type": "string",
+      "enum": [
+        "ready_now",
+        "30_days",
+        "60_days",
+        "just_exploring"
+      ],
+      "default": "just_exploring",
+      "description": "How soon the advertiser wants to launch"
+    },
+    "creative_ready": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the advertiser already has ad creative assets prepared"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Free-text notes about the campaign or goals"
+    },
+    "step_reached": {
+      "type": "number",
+      "default": 4,
+      "description": "Highest onboarding step reached by the applicant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "review",
+        "approved",
+        "rejected"
+      ],
+      "default": "submitted",
+      "description": "Lifecycle status of the advertising inquiry"
+    }
+  },
+  "required": [
+    "business_name",
+    "contact_name",
+    "contact_email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

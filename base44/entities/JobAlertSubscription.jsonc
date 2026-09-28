@@ -1,0 +1,96 @@
+{
+  "name": "JobAlertSubscription",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Name of the job seeker subscribing to alerts"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number to receive job alert SMS"
+    },
+    "selected_field": {
+      "type": "string",
+      "enum": [
+        "Technology",
+        "Telecom",
+        "Marketing",
+        "Design",
+        "Hardware",
+        "Sales",
+        "Logistics",
+        "Community",
+        "Accessibility",
+        "General"
+      ],
+      "default": "General",
+      "description": "Job field the subscriber wants alerts for"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "remote",
+          "full-time",
+          "part-time",
+          "contract"
+        ]
+      },
+      "default": [],
+      "description": "Preference tags so the subscriber only gets alerts for jobs matching these criteria (empty = all jobs in the field)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the subscription is currently active"
+    }
+  },
+  "required": [
+    "full_name",
+    "phone",
+    "selected_field"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

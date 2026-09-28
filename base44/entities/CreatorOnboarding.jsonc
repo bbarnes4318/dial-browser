@@ -1,0 +1,116 @@
+{
+  "name": "CreatorOnboarding",
+  "type": "object",
+  "properties": {
+    "creator_name": {
+      "type": "string",
+      "description": "Display name of the content creator"
+    },
+    "creator_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the creator"
+    },
+    "creator_type": {
+      "type": "string",
+      "enum": [
+        "artist",
+        "host",
+        "podcaster",
+        "producer",
+        "influencer",
+        "other"
+      ],
+      "default": "artist",
+      "description": "Type of content creator"
+    },
+    "disclaimer_agreed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Creator confirmed the legal disclaimer"
+    },
+    "policy_agreed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Creator agreed to the platform policy agreement"
+    },
+    "revenue_share_agreed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Creator agreed to the 30% platform revenue share on donations, gifts, tips, and membership fees"
+    },
+    "revenue_share_percent": {
+      "type": "number",
+      "default": 30,
+      "description": "Platform revenue share percentage applied to all creator earnings"
+    },
+    "nda_agreed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Creator agreed to the non-disclosure agreement"
+    },
+    "nda_verbal_url": {
+      "type": "string",
+      "description": "URL of the recorded verbal confirmation of NDA agreement"
+    },
+    "nda_verbal_transcript": {
+      "type": "string",
+      "description": "Optional text transcript of the verbal confirmation"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether onboarding was fully completed and the creator may begin publishing content"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When onboarding was completed"
+    }
+  },
+  "required": [
+    "creator_name",
+    "creator_email"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "Job Alert SMS Notifier",
+  "description": "When a new job listing is created, finds subscribers matching the job's field and sends them an SMS alert so they can apply fast from their phone.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "JobListing",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ .trigger.data.active == true }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "job_alert_notifier",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alerts": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendJobAlerts",
+            "args": {
+              "job_id": "${ .trigger.entity_id }",
+              "title": "${ .trigger.data.title }",
+              "company": "${ .trigger.data.company }",
+              "field": "${ .trigger.data.field }",
+              "location": "${ .trigger.data.location }",
+              "pay": "${ .trigger.data.pay }",
+              "job_type": "${ .trigger.data.job_type }",
+              "dial_code": "${ .trigger.data.dial_code }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send job alert SMS",
+            "description": "Notify matching subscribers"
+          }
+        }
+      }
+    ]
+  }
+}

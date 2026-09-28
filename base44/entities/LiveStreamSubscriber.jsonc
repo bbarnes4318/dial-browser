@@ -1,0 +1,68 @@
+{
+  "name": "LiveStreamSubscriber",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Name of the subscriber who wants live stream alerts"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number to receive live stream start SMS alerts"
+    },
+    "favorite_creator": {
+      "type": "string",
+      "description": "Optional creator name they want alerts for (blank = all streams)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the subscriber is currently receiving live stream alerts"
+    }
+  },
+  "required": [
+    "full_name",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

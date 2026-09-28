@@ -1,0 +1,108 @@
+{
+  "name": "AppNotification",
+  "type": "object",
+  "properties": {
+    "notification_type": {
+      "type": "string",
+      "enum": [
+        "missed_call",
+        "new_email",
+        "meeting_reminder",
+        "voicemail",
+        "job_alert",
+        "sms_alert",
+        "system",
+        "new_service",
+        "social_message",
+        "community_event"
+      ],
+      "default": "system",
+      "description": "Type of notification alert \u2014 includes new service listings, social direct messages, and community event broadcasts alongside call/email/meeting/voicemail/job/sms alerts"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title/subject of the notification"
+    },
+    "message": {
+      "type": "string",
+      "description": "Full notification message content"
+    },
+    "related_id": {
+      "type": "string",
+      "description": "ID of the related entity (call, email, meeting, service listing, social message, etc.)"
+    },
+    "related_type": {
+      "type": "string",
+      "description": "Entity type the notification refers to (IncomingCall, VideoMeeting, DialServiceListing, SocialMessage, etc.)"
+    },
+    "action_label": {
+      "type": "string",
+      "description": "Optional label for a call-to-action button"
+    },
+    "action_url": {
+      "type": "string",
+      "description": "Optional URL or route to navigate to when the notification is acted on"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ],
+      "default": "normal",
+      "description": "Priority level for visual emphasis"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has viewed this notification"
+    }
+  },
+  "required": [
+    "notification_type",
+    "title",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

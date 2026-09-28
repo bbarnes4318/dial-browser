@@ -1,0 +1,40 @@
+{
+  "description": "Sends a helpful voice-usage tip when a user reaches interaction milestones (1st, 3rd, 5th, 10th voice command)",
+  "name": "Interaction Voice Tip Notifier",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "interaction_voice_tip",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_tip": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendInteractionVoiceTip",
+            "args": {
+              "userId": "${ .trigger.data.created_by_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Check milestone & send tip",
+            "description": "Sends voice tip on 1st, 3rd, 5th, 10th interaction"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "VoiceCommand"
+    }
+  }
+}

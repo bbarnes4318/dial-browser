@@ -1,0 +1,45 @@
+{
+  "description": "Reads the booking service summary back to the caller via the in-app phone the moment a callback booking is created \u2014 creates a transcript-only voicemail that VoicemailBox speaks aloud through natural, language-aware TTS",
+  "name": "Booking Voice Confirmation",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "booking_voice_confirmation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "voice_confirm": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendBookingVoiceConfirmation",
+            "args": {
+              "callback_request_id": "${ .trigger.entity_id }",
+              "provider_name": "${ .trigger.data.provider_name }",
+              "caller_name": "${ .trigger.data.caller_name }",
+              "caller_phone": "${ .trigger.data.caller_phone }",
+              "service_needed": "${ .trigger.data.service_needed }",
+              "preferred_time": "${ .trigger.data.preferred_time }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Read back booking summary via phone",
+            "description": "Creates a voice-confirmation voicemail that speaks the service summary back to the caller"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CallbackRequest"
+    }
+  }
+}

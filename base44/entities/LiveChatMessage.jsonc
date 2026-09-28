@@ -1,0 +1,74 @@
+{
+  "name": "LiveChatMessage",
+  "type": "object",
+  "properties": {
+    "stream_id": {
+      "type": "string",
+      "description": "ID of the live stream or podcast session this message belongs to"
+    },
+    "stream_title": {
+      "type": "string",
+      "description": "Title of the stream (denormalized for display)"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name of the chatter"
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "The chat message text"
+    },
+    "is_host": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the message was sent by the stream host"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "voice",
+        "tip",
+        "system"
+      ],
+      "default": "text",
+      "description": "Type of chat message: regular text, voice-to-text, tip notification, or system message"
+    }
+  },
+  "required": [
+    "stream_id",
+    "author_name",
+    "body"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

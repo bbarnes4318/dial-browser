@@ -1,0 +1,90 @@
+{
+  "name": "SocialProfile",
+  "type": "object",
+  "properties": {
+    "handle": {
+      "type": "string",
+      "description": "Unique lowercase @handle for the social profile"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Display name shown on the profile header"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "URL of the profile avatar image"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Short bio shown on the profile header"
+    },
+    "voice_greeting_url": {
+      "type": "string",
+      "description": "URL of the member's recorded voice greeting clip played on the profile header"
+    },
+    "voice_greeting_transcript": {
+      "type": "string",
+      "description": "Auto-generated transcript of the voice greeting"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the member who owns this social profile \u2014 used to look up a member's profile on load"
+    },
+    "follower_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of members following this profile"
+    },
+    "following_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of profiles this member follows"
+    },
+    "post_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of posts published by this profile"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this profile is visible and active"
+    }
+  },
+  "required": [
+    "handle",
+    "display_name",
+    "owner_user_id"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

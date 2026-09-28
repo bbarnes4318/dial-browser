@@ -1,0 +1,114 @@
+{
+  "name": "ScheduledMessage",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Label for this scheduled message campaign"
+    },
+    "message_body": {
+      "type": "string",
+      "description": "The SMS or email content to send to recipients"
+    },
+    "send_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the system should send the message to all recipients"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "sms",
+          "email"
+        ]
+      },
+      "default": [
+        "sms"
+      ],
+      "description": "Delivery channels: SMS, email, or both"
+    },
+    "contact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Contact entity IDs to send the message to"
+    },
+    "recipient_summary": {
+      "type": "string",
+      "description": "Comma-separated recipient names for display without loading contacts"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "sending",
+        "sent",
+        "partially_sent",
+        "failed",
+        "cancelled"
+      ],
+      "default": "scheduled",
+      "description": "Current delivery status of the scheduled message"
+    },
+    "delivery_results": {
+      "type": "string",
+      "description": "JSON string of per-recipient delivery results for audit trail"
+    },
+    "delivery_alert_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the delivery confirmation alert was sent to the user"
+    }
+  },
+  "required": [
+    "title",
+    "message_body",
+    "send_date",
+    "channels"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

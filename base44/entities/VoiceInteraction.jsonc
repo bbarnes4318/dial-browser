@@ -1,0 +1,98 @@
+{
+  "name": "VoiceInteraction",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short label for the saved interaction"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "dial_browser",
+        "voice_memo",
+        "service_call"
+      ],
+      "default": "voice_memo",
+      "description": "Where the interaction originated"
+    },
+    "query": {
+      "type": "string",
+      "description": "The original search query (if from Dial Browser)"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Text content or answer from the interaction"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "URL of the uploaded voice recording"
+    },
+    "duration_sec": {
+      "type": "number",
+      "description": "Recording length in seconds"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Optional related dial service name"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "User-applied topic tags for categorizing the consultation (e.g. Medical, Travel)"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user starred this interaction as important"
+    }
+  },
+  "required": [
+    "title",
+    "source"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

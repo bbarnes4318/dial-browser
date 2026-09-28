@@ -1,0 +1,118 @@
+{
+  "name": "RealEstateListing",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title, e.g. '4 Bed Modern Suburban Home'"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "single_family",
+        "condo",
+        "townhouse",
+        "land",
+        "commercial",
+        "waterfront"
+      ],
+      "description": "Property category for the Dial Real-Estate filter tabs"
+    },
+    "beds": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of bedrooms (0 for land/commercial)"
+    },
+    "baths": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of bathrooms"
+    },
+    "sqft": {
+      "type": "number",
+      "default": 0,
+      "description": "Interior square footage (0 for land)"
+    },
+    "lot_size": {
+      "type": "string",
+      "description": "Lot size description, e.g. '0.25 acres' or '10 acres'"
+    },
+    "year_built": {
+      "type": "number",
+      "description": "Year the property was built (0 for vacant land)"
+    },
+    "price": {
+      "type": "number",
+      "description": "Asking price in USD"
+    },
+    "city": {
+      "type": "string",
+      "description": "City where the property is located"
+    },
+    "state": {
+      "type": "string",
+      "description": "State / region"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address of the property"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Optional photo URL. Empty uses a generated gradient cover."
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Listing agent or brokerage name"
+    },
+    "agent_phone": {
+      "type": "string",
+      "description": "Contact number for the listing agent"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Short property description"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Surfaced in the featured row"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "pending",
+        "sold"
+      ],
+      "default": "available",
+      "description": "Sale status \u2014 only 'available' listings show in the marketplace"
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "price",
+    "city",
+    "state"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

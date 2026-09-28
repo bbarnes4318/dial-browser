@@ -1,0 +1,253 @@
+{
+  "name": "DistributionApplication",
+  "type": "object",
+  "properties": {
+    "artist_or_label_name": {
+      "type": "string",
+      "description": "Artist or record label name applying for distribution"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Primary artist name for the campaign"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Contact person name"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Contact email address"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "music_genre": {
+      "type": "string",
+      "description": "Primary music genre"
+    },
+    "website": {
+      "type": "string",
+      "description": "Artist or label website URL"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Artist biography"
+    },
+    "artist_photo_url": {
+      "type": "string",
+      "description": "URL of uploaded artist photograph"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL of uploaded artist or label logo"
+    },
+    "streaming_links": {
+      "type": "string",
+      "description": "Streaming platform links"
+    },
+    "youtube_channel": {
+      "type": "string",
+      "description": "YouTube channel URL"
+    },
+    "song_title": {
+      "type": "string",
+      "description": "Title of the release to distribute"
+    },
+    "album_name": {
+      "type": "string",
+      "description": "Album or EP name"
+    },
+    "release_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Planned release date"
+    },
+    "producer_info": {
+      "type": "string",
+      "description": "Producer information"
+    },
+    "songwriter_info": {
+      "type": "string",
+      "description": "Songwriter information"
+    },
+    "copyright_info": {
+      "type": "string",
+      "description": "Copyright information"
+    },
+    "isrc": {
+      "type": "string",
+      "description": "ISRC code when applicable"
+    },
+    "explicit_content": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the release contains explicit content"
+    },
+    "cover_artwork_url": {
+      "type": "string",
+      "description": "URL of uploaded cover artwork"
+    },
+    "music_file_url": {
+      "type": "string",
+      "description": "URL of uploaded music audio file"
+    },
+    "music_video_url": {
+      "type": "string",
+      "description": "YouTube or approved video URL"
+    },
+    "target_regions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Selected target distribution regions"
+    },
+    "target_countries": {
+      "type": "string",
+      "description": "Specific target countries or markets (free text)"
+    },
+    "audience_age_range": {
+      "type": "string",
+      "description": "Target audience age range"
+    },
+    "audience_location": {
+      "type": "string",
+      "description": "Target audience geographic location"
+    },
+    "audience_genre": {
+      "type": "string",
+      "description": "Target audience music genre preference"
+    },
+    "audience_interests": {
+      "type": "string",
+      "description": "Target audience musical interests"
+    },
+    "fan_demographics": {
+      "type": "string",
+      "description": "Fan demographics notes"
+    },
+    "distribution_goals": {
+      "type": "string",
+      "description": "Distribution goals for the campaign"
+    },
+    "campaign_budget": {
+      "type": "number",
+      "default": 0,
+      "description": "Campaign budget in USD"
+    },
+    "campaign_timeline": {
+      "type": "string",
+      "enum": [
+        "ready_now",
+        "30_90_days",
+        "just_price_checking"
+      ],
+      "default": "just_price_checking",
+      "description": "Distribution timeline preference"
+    },
+    "campaign_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Campaign start date"
+    },
+    "campaign_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Campaign end date"
+    },
+    "instagram_handle": {
+      "type": "string",
+      "description": "Instagram handle"
+    },
+    "other_social_links": {
+      "type": "string",
+      "description": "Other social media profile links"
+    },
+    "sms_campaign": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to include an SMS campaign component"
+    },
+    "email_campaign": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to include an email campaign component"
+    },
+    "concert_ticket_url": {
+      "type": "string",
+      "description": "Concert ticket purchase URL"
+    },
+    "merchandise_url": {
+      "type": "string",
+      "description": "Merchandise store URL"
+    },
+    "live_stream_url": {
+      "type": "string",
+      "description": "Live stream URL"
+    },
+    "step_reached": {
+      "type": "number",
+      "default": 1,
+      "description": "Highest wizard step reached by the applicant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "review",
+        "approved",
+        "rejected"
+      ],
+      "default": "draft",
+      "description": "Application lifecycle status"
+    }
+  },
+  "required": [
+    "artist_or_label_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

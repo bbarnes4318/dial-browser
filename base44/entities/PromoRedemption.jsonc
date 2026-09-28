@@ -1,0 +1,58 @@
+{
+  "name": "PromoRedemption",
+  "type": "object",
+  "properties": {
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session id linking this redemption to a confirmed payment"
+    },
+    "promo_code_id": {
+      "type": "string",
+      "description": "PromoCode record id that was redeemed"
+    },
+    "promo_code": {
+      "type": "string",
+      "description": "Promo code string (denormalized for logging)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "consumed"
+      ],
+      "default": "pending",
+      "description": "pending = checkout created but payment not yet confirmed; consumed = payment confirmed and one use counted against the promo cap"
+    },
+    "consumed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the redemption was consumed (payment confirmed)"
+    }
+  },
+  "required": [
+    "checkout_id",
+    "promo_code_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "name": "SmsNotification",
+  "type": "object",
+  "properties": {
+    "notification_type": {
+      "type": "string",
+      "enum": [
+        "new_match",
+        "new_message",
+        "event_starting",
+        "job_alert",
+        "daily_summary",
+        "emergency_alert",
+        "status_update",
+        "contractor_alert",
+        "category_alert",
+        "booking_receipt",
+        "onboarding"
+      ],
+      "description": "Type of SMS alert: dating match, incoming message, event reminder, job match, daily summary digest, emergency distress signal, service status update, contractor availability alert, new category provider alert, a booking confirmation receipt, or an onboarding sequence message guiding new members through their first voice-dial request"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Name of the member receiving the SMS alert"
+    },
+    "recipient_phone": {
+      "type": "string",
+      "description": "Phone number the SMS alert is sent to"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title/subject of the notification"
+    },
+    "message_body": {
+      "type": "string",
+      "description": "Full SMS message content sent to the member"
+    },
+    "related_name": {
+      "type": "string",
+      "description": "Name of the match, sender, event, job, provider, or booking the alert refers to"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "delivered",
+        "pending",
+        "failed"
+      ],
+      "default": "sent",
+      "description": "Delivery status of the SMS alert"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the member has viewed this notification in-app"
+    }
+  },
+  "required": [
+    "notification_type",
+    "recipient_name",
+    "recipient_phone",
+    "message_body"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

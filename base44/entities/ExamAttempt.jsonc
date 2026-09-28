@@ -1,0 +1,105 @@
+{
+  "name": "ExamAttempt",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "User id of the learner who took this attempt"
+    },
+    "assessment_id": {
+      "type": "string",
+      "description": "Assessment this attempt is for"
+    },
+    "course_id": {
+      "type": "string",
+      "description": "Denormalized course id"
+    },
+    "attempt_number": {
+      "type": "number",
+      "default": 1,
+      "description": "Which attempt this is (1-based), capped by Assessment.retake_cap"
+    },
+    "answers": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Captured per-question answers: { question_id, type, response, correct, marks_awarded }"
+    },
+    "score_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Final percentage score for this attempt"
+    },
+    "passed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the score met the assessment passing threshold"
+    },
+    "delivery_channel": {
+      "type": "string",
+      "enum": [
+        "voice",
+        "sms",
+        "web"
+      ],
+      "default": "voice",
+      "description": "How the learner took this assessment"
+    },
+    "transcript_url": {
+      "type": "string",
+      "description": "URL of the spoken-answer transcript (uploaded recording)"
+    },
+    "llm_grades": {
+      "type": "string",
+      "description": "JSON string of LLM essay/short-answer grades with rationale"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "assessment_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "name": "DialServiceRequest",
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string",
+      "description": "Proposed name of the requested dial service"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Local Services",
+        "Travel",
+        "Transportation",
+        "Housing",
+        "Music",
+        "Shopping",
+        "Creators",
+        "AI Assistants",
+        "Healthcare",
+        "Finance",
+        "Education",
+        "Government",
+        "Social",
+        "Other"
+      ],
+      "default": "Other",
+      "description": "Service category the request fits into"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of what the service should do"
+    },
+    "use_case": {
+      "type": "string",
+      "description": "Example use case or scenario where this service would help"
+    },
+    "proposed_dial_code": {
+      "type": "string",
+      "description": "Optional suggested dial code (e.g. *109#)"
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Name of the community member submitting the request"
+    },
+    "requester_region": {
+      "type": "string",
+      "description": "City or region of the requester"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "under_review",
+        "planned",
+        "in_development",
+        "launched",
+        "declined"
+      ],
+      "default": "submitted",
+      "description": "Review status of the service request"
+    },
+    "upvotes": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of community upvotes supporting this request"
+    }
+  },
+  "required": [
+    "service_name",
+    "category",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

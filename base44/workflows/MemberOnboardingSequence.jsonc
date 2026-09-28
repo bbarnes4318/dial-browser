@@ -1,0 +1,104 @@
+{
+  "description": "Sends new members a 3-message SMS sequence guiding them through their first voice-dial service request after they register.",
+  "name": "Member Onboarding Sequence",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "app_user_auth",
+      "events": [
+        "signup"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "member_onboarding_sequence",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "wait_member": {
+          "wait": "PT2M",
+          "then": "send_step_1",
+          "x-base44": {
+            "title": "Wait for member record",
+            "description": "Let the Member profile settle after signup"
+          }
+        }
+      },
+      {
+        "send_step_1": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendOnboardingSms",
+            "args": {
+              "user_id": "${ .trigger.user_id }",
+              "step": 1
+            }
+          },
+          "then": "wait_day_1",
+          "x-base44": {
+            "title": "Send welcome SMS",
+            "description": "Step 1 \u2014 intro to voice dial"
+          }
+        }
+      },
+      {
+        "wait_day_1": {
+          "wait": "P1D",
+          "then": "send_step_2",
+          "x-base44": {
+            "title": "Wait 1 day",
+            "description": "Before step 2"
+          }
+        }
+      },
+      {
+        "send_step_2": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendOnboardingSms",
+            "args": {
+              "user_id": "${ .trigger.user_id }",
+              "step": 2
+            }
+          },
+          "then": "wait_day_3",
+          "x-base44": {
+            "title": "Send service guide SMS",
+            "description": "Step 2 \u2014 pick a service + dial codes"
+          }
+        }
+      },
+      {
+        "wait_day_3": {
+          "wait": "P2D",
+          "then": "send_step_3",
+          "x-base44": {
+            "title": "Wait 2 days",
+            "description": "Before step 3"
+          }
+        }
+      },
+      {
+        "send_step_3": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendOnboardingSms",
+            "args": {
+              "user_id": "${ .trigger.user_id }",
+              "step": 3
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send first-request nudge",
+            "description": "Step 3 \u2014 complete first request"
+          }
+        }
+      }
+    ]
+  }
+}

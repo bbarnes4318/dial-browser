@@ -1,0 +1,123 @@
+{
+  "name": "EmergencyBroadcast",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short headline of the emergency broadcast or safety announcement"
+    },
+    "message_body": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Full SMS message content delivered to registered members"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "critical",
+        "sos"
+      ],
+      "default": "warning",
+      "description": "Severity level \u2014 'critical' and 'sos' auto-trigger immediate SMS broadcast to all members via workflow"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "service_outage",
+        "safety_alert",
+        "weather_emergency",
+        "system_maintenance",
+        "medical_advisory",
+        "security_incident",
+        "other"
+      ],
+      "default": "safety_alert",
+      "description": "Type of emergency or announcement"
+    },
+    "affected_regions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "all",
+          "northeast",
+          "southeast",
+          "midwest",
+          "southwest",
+          "west",
+          "national"
+        ]
+      },
+      "default": [
+        "all"
+      ],
+      "description": "Regions affected by the announcement"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this broadcast is currently active and unresolved"
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of SMS notifications successfully created"
+    },
+    "failed_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of SMS notifications that failed to send"
+    },
+    "total_recipients": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of members targeted by this broadcast"
+    },
+    "broadcast_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sending",
+        "delivered",
+        "failed",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Current delivery status of the broadcast"
+    },
+    "triggered_by_name": {
+      "type": "string",
+      "description": "Name of the admin or system that issued the broadcast"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the emergency was resolved or deactivated"
+    }
+  },
+  "required": [
+    "title",
+    "message_body",
+    "severity"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

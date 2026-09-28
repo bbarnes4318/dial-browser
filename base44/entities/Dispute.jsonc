@@ -1,0 +1,122 @@
+{
+  "name": "Dispute",
+  "type": "object",
+  "properties": {
+    "trade_id": {
+      "type": "string",
+      "description": "Reference to the trade, callback, or transaction being disputed"
+    },
+    "listing_title": {
+      "type": "string",
+      "description": "Title of the item, service, or listing involved in the dispute (denormalized for display)"
+    },
+    "reporter_name": {
+      "type": "string",
+      "description": "Name of the member filing the dispute"
+    },
+    "counterparty_name": {
+      "type": "string",
+      "description": "Name of the other party involved (provider, seller, etc.)"
+    },
+    "dispute_type": {
+      "type": "string",
+      "enum": [
+        "item_not_received",
+        "item_not_as_described",
+        "payment_not_received",
+        "damaged_item",
+        "service_not_completed",
+        "poor_service_quality",
+        "overcharged",
+        "unprofessional_conduct",
+        "no_show",
+        "other"
+      ],
+      "default": "other",
+      "description": "Category of the reported issue \u2014 includes both marketplace trade and service provider disputes"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the problem from the reporter"
+    },
+    "attachment_url": {
+      "type": "string",
+      "description": "URL of an uploaded screenshot, photo, or document the user attached as evidence"
+    },
+    "attachment_name": {
+      "type": "string",
+      "description": "Original filename of the attached evidence file"
+    },
+    "voice_note_url": {
+      "type": "string",
+      "description": "URL of a brief voice recording the user attached explaining the problem in their own words"
+    },
+    "voice_note_duration": {
+      "type": "number",
+      "default": 0,
+      "description": "Duration of the attached voice note in seconds"
+    },
+    "voice_note_transcript": {
+      "type": "string",
+      "description": "Auto-generated text transcript of the attached voice note, produced by the transcribe-dispute-voice backend function so admins can scan complaints without listening to each recording"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "under_review",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "pending",
+      "description": "Current review status of the dispute"
+    }
+  },
+  "required": [
+    "listing_title",
+    "reporter_name",
+    "dispute_type",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

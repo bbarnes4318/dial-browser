@@ -1,0 +1,49 @@
+{
+  "name": "SocialFollow",
+  "type": "object",
+  "properties": {
+    "follower_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile that is following"
+    },
+    "followed_profile_id": {
+      "type": "string",
+      "description": "ID of the SocialProfile being followed"
+    },
+    "follower_handle": {
+      "type": "string",
+      "description": "Denormalized handle of the follower"
+    },
+    "followed_handle": {
+      "type": "string",
+      "description": "Denormalized handle of the followed profile"
+    }
+  },
+  "required": [
+    "follower_profile_id",
+    "followed_profile_id"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

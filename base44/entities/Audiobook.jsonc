@@ -1,0 +1,155 @@
+{
+  "name": "Audiobook",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the audiobook"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author of the book"
+    },
+    "genre": {
+      "type": "string",
+      "enum": [
+        "Comedy",
+        "Action",
+        "Thriller",
+        "Mystery",
+        "Romance",
+        "War",
+        "History",
+        "Crime",
+        "Educational",
+        "Documentaries",
+        "Children's",
+        "Drama",
+        "Urban"
+      ],
+      "description": "Primary genre category"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Short description of the book"
+    },
+    "cover_art_url": {
+      "type": "string",
+      "description": "URL of the audiobook cover art image"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "Direct URL to the audio file for playback. For multi-chapter books this is the first chapter; chapter_audio_urls holds the full ordered playlist."
+    },
+    "chapter_audio_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Ordered list of per-chapter audio URLs for multi-chapter audiobooks. The player plays them in sequence. Empty for single-chapter books (audio_url is used)."
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Estimated duration in minutes"
+    },
+    "maturity_rating": {
+      "type": "string",
+      "enum": [
+        "G",
+        "PG",
+        "PG-13",
+        "R",
+        "Children"
+      ],
+      "default": "PG",
+      "description": "Maturity rating to prevent minors from accessing adult content"
+    },
+    "series_name": {
+      "type": "string",
+      "description": "Name of the series if part of a trilogy or series (empty for standalone)"
+    },
+    "series_number": {
+      "type": "number",
+      "description": "Position within the series (1, 2, 3...)"
+    },
+    "series_type": {
+      "type": "string",
+      "enum": [
+        "standalone",
+        "trilogy",
+        "series",
+        "developing"
+      ],
+      "default": "standalone",
+      "description": "Whether this is a standalone book, part of a trilogy, a series, or a developing series with new books added regularly"
+    },
+    "narrator": {
+      "type": "string",
+      "description": "Name of the narrator/voice actor"
+    },
+    "chapter_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of chapters/sections"
+    },
+    "archive_identifier": {
+      "type": "string",
+      "description": "Archive.org identifier for the LibriVox audiobook"
+    },
+    "price": {
+      "type": "number",
+      "default": 0,
+      "description": "One-time purchase price in USD to unlock the full download. 0 = free (public download). Wix rejects charges under 0.50, so a paid title must be >= 0.50."
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this audiobook is featured on the landing page"
+    },
+    "is_new": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a newly released audiobook. Shows a NEW badge on the card and appears in the New Releases section."
+    }
+  },
+  "required": [
+    "title",
+    "author",
+    "genre",
+    "audio_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

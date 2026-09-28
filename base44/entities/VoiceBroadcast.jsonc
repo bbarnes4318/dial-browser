@@ -1,0 +1,124 @@
+{
+  "name": "VoiceBroadcast",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the voice broadcast"
+    },
+    "message_text": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional text summary of the audio message included in the SMS body"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "URL of the recorded audio message"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Duration of the recorded audio in seconds"
+    },
+    "target_audience": {
+      "type": "string",
+      "enum": [
+        "all",
+        "medical",
+        "dental",
+        "real_estate",
+        "construction",
+        "grocery",
+        "weather",
+        "music",
+        "jobs",
+        "bill_payment",
+        "marketplace"
+      ],
+      "default": "all",
+      "description": "Which group of opted-in category alert subscribers to send the broadcast to"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "all",
+        "northeast",
+        "southeast",
+        "midwest",
+        "southwest",
+        "west",
+        "national"
+      ],
+      "default": "all",
+      "description": "Regional filter for subscribers receiving the broadcast"
+    },
+    "scheduled_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the broadcast is scheduled to send (null = immediate / unscheduled)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "sending",
+        "sent",
+        "failed",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Current status of the broadcast"
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of SMS notifications successfully created"
+    },
+    "failed_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of SMS notifications that failed to send"
+    },
+    "total_recipients": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of opted-in subscribers targeted"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the broadcast was actually sent"
+    },
+    "created_by_name": {
+      "type": "string",
+      "description": "Display name of the admin who created the broadcast"
+    }
+  },
+  "required": [
+    "title",
+    "audio_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
