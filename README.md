@@ -60,6 +60,22 @@ VITE_BASE44_APP_BASE_URL=https://www.dialbrowser.com
 
 When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
 
+## Phone (Hoppwhistle)
+
+The Dial Phone is a Hoppwhistle softphone client: calls, caller IDs, routing,
+recording and presence all come from Hoppwhistle. Point the app at it with:
+
+```bash
+VITE_HOPPWHISTLE_API_URL=https://your-hoppwhistle-host
+# Only if FreeSWITCH's SIP WebSocket is not at wss://<that host>/ws:
+# VITE_HOPPWHISTLE_SIP_WS_URL=wss://sip.example.com:7443
+```
+
+Neither value is secret. Agents connect the phone by signing in with their
+Hoppwhistle agent account. See `docs/HOPPWHISTLE_VOICE_INTEGRATION.md`.
+
+Run the phone's tests with `npm test`.
+
 ## Publish Your Changes
 
 After pushing your changes to git, open the Base44 dashboard and publish the app:

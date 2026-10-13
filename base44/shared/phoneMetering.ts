@@ -3,7 +3,7 @@ import { normalizePhone } from "./smsAuth.ts";
 
 /**
  * phoneMetering — shared softphone metering helpers used by the
- * send-phone-sms, mint-voice-token, phone-call-status, and phone-account
+ * send-phone-sms, phone-call-status, and phone-account
  * functions. All operate on a service-role base44 client so provisioning,
  * metering, and entitlement writes succeed regardless of caller role.
  */

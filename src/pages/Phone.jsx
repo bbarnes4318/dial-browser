@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Home, Loader2, Phone, MessageSquare, Power, AlertCircle, Grid3x3, Clock, ChevronRight, Signal, Wifi, BatteryFull, User, Users } from "lucide-react";
+import { Home, Loader2, MessageSquare, Power, Grid3x3, Clock, ChevronRight, Signal, Wifi, BatteryFull, User, Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { useTwilioVoice } from "@/hooks/useTwilioVoice";
+import { useHoppwhistleVoice, useCallSurface } from "@/telephony/hoppwhistle/HoppwhistleVoiceProvider";
+import { PhoneStatus } from "@/telephony/hoppwhistle";
 import PhoneHeader from "@/components/phone/PhoneHeader";
 import EmergencyDisclaimerBanner from "@/components/phone/EmergencyDisclaimerBanner";
 import EmergencyDisclaimerModal from "@/components/phone/EmergencyDisclaimerModal";
@@ -13,8 +14,10 @@ import ContactsPanel from "@/components/phone/ContactsPanel";
 import CallForwarding from "@/components/phone/CallForwarding";
 import ModernCallView from "@/components/phone/ModernCallView";
 import PostCallRatingDialog from "@/components/phone/PostCallRatingDialog";
+import VoiceStatusNotice from "@/components/phone/VoiceStatusNotice";
+import CallerIdSelect from "@/components/phone/CallerIdSelect";
+import { callViewProps } from "@/components/phone/voiceCallViewProps";
 
-const CALL_STATES = ["connecting", "ringing", "in-call", "incoming"];
 
 export default function PhonePage() {
   const { user } = useAuth();
@@ -22,16 +25,16 @@ export default function PhonePage() {
   const [loading, setLoading] = useState(true);
   const [ackBusy, setAckBusy] = useState(false);
   const [provisioning, setProvisioning] = useState(false);
-  const [smsSending, setSmsSending] = useState(false);
-  const [callTarget, setCallTarget] = useState("");
   const [ratingOpen, setRatingOpen] = useState(false);
   const [ratedCall, setRatedCall] = useState({ remoteNumber: "", direction: "outbound" });
   const [showContacts, setShowContacts] = useState(false);
   const [params] = useSearchParams();
   const dialParam = params.get("dial");
 
-  const voice = useTwilioVoice();
-  const prevStatus = useRef(voice.status);
+  const voice = useHoppwhistleVoice();
+  useCallSurface();
+  const autoConnected = useRef(false);
+  const autoDialed = useRef(false);
 
   const loadAccount = useCallback(async () => {
     try {
@@ -45,31 +48,33 @@ export default function PhonePage() {
 
   useEffect(() => { loadAccount(); }, [loadAccount]);
 
-  // Auto-dial when arriving from the address book (?dial=<number>) once the voice line is ready.
-  useEffect(() => {
-    if (dialParam && voice.ready && !callTarget) {
-      placeCall(dialParam);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialParam, voice.ready]);
-
-  // Post-call rating trigger: fires when a call state transitions to idle.
-  useEffect(() => {
-    const wasInCall = CALL_STATES.includes(prevStatus.current);
-    const nowIdle = voice.status === "idle";
-    if (wasInCall && nowIdle) {
-      setRatedCall({
-        remoteNumber: callTarget || "",
-        direction: prevStatus.current === "incoming" ? "inbound" : "outbound",
-      });
-      setRatingOpen(true);
-    }
-    prevStatus.current = voice.status;
-  }, [voice.status, callTarget]);
-
   const entitlement = account?.entitlement;
   const needsDisclaimer = entitlement && !entitlement.disclaimer_acknowledged;
   const isPaid = account?.tier && account.tier !== "free";
+
+  // Bring the phone online on arrival, once, after the non-emergency disclaimer
+  // is accepted and a Hoppwhistle session is linked. A deliberate "go offline"
+  // is respected for the rest of the visit.
+  useEffect(() => {
+    if (loading || needsDisclaimer || voice.authRequired || autoConnected.current) return;
+    if (voice.phoneStatus !== PhoneStatus.OFFLINE) return;
+    autoConnected.current = true;
+    void voice.connect();
+  }, [loading, needsDisclaimer, voice.authRequired, voice.phoneStatus, voice.connect]);
+
+  // Auto-dial when arriving from the address book (?dial=<number>) once the phone is registered.
+  useEffect(() => {
+    if (dialParam && voice.isRegistered && !autoDialed.current) {
+      autoDialed.current = true;
+      void voice.makeCall(dialParam);
+    }
+  }, [dialParam, voice.isRegistered, voice.makeCall]);
+
+  // Post-call rating: once per ended call.
+  useEffect(() => voice.onCallEnded((ended) => {
+    setRatedCall({ remoteNumber: ended.phoneNumber || "", direction: ended.direction });
+    setRatingOpen(true);
+  }), [voice.onCallEnded]);
 
   const ackDisclaimer = async () => {
     setAckBusy(true);
@@ -91,10 +96,20 @@ export default function PhonePage() {
     setProvisioning(false);
   };
 
-  const placeCall = async (to, record) => {
-    setCallTarget(to);
-    await voice.placeCall(to, { record });
+  // Every dial path on this page -- keypad, contacts -- goes through the voice
+  // client. Recording is Hoppwhistle's policy, so there is no browser record flag.
+  const placeCall = (to) => voice.makeCall(to);
+
+  const online = voice.phoneStatus === PhoneStatus.REGISTERED;
+  const togglePhone = () => {
+    if (online) return voice.disconnect();
+    if (voice.phoneStatus === PhoneStatus.STANDBY) return voice.takeOver();
+    return voice.reconnect();
   };
+  const phoneLabel =
+    online ? "Online" :
+    voice.isConnecting && !voice.dialing ? "Connecting" :
+    voice.phoneStatus === PhoneStatus.STANDBY ? "Other tab" : "Go online";
 
   const buyMore = () => { window.location.href = "/#pricing"; };
 
@@ -106,7 +121,7 @@ export default function PhonePage() {
     );
   }
 
-  const inCall = CALL_STATES.includes(voice.status);
+  const inCall = Boolean(voice.callViewStatus);
 
   return (
     <div className="min-h-screen pb-24" style={{ background: "#05070A" }}>
@@ -120,10 +135,12 @@ export default function PhonePage() {
         </Link>
         <p className="font-mono text-[10px] tracking-[0.4em]" style={{ color: "#D1FF26" }}>// DIAL PHONE</p>
         <button
-          onClick={voice.register}
-          className="flex items-center gap-2 px-3 py-2 font-mono text-[10px] tracking-widest uppercase"
-          style={{ border: `0.5px solid ${voice.ready ? "rgba(209,255,38,0.4)" : "rgba(138,143,152,0.25)"}`, color: voice.ready ? "#D1FF26" : "#8A8F98" }}>
-          <Power size={12} /> {voice.ready ? "Online" : "Go online"}
+          onClick={togglePhone}
+          disabled={voice.authRequired || voice.phoneStatus === PhoneStatus.DISABLED}
+          title={online ? "Go offline" : undefined}
+          className="flex items-center gap-2 px-3 py-2 font-mono text-[10px] tracking-widest uppercase disabled:opacity-50"
+          style={{ border: `0.5px solid ${online ? "rgba(209,255,38,0.4)" : "rgba(138,143,152,0.25)"}`, color: online ? "#D1FF26" : "#8A8F98" }}>
+          <Power size={12} /> {phoneLabel}
         </button>
       </header>
 
@@ -132,12 +149,7 @@ export default function PhonePage() {
 
         <EmergencyDisclaimerBanner />
 
-        {voice.error && (
-          <div className="flex items-start gap-2 p-3 mb-4" style={{ background: "rgba(239,68,68,0.08)", border: "0.5px solid rgba(239,68,68,0.3)", borderRadius: 8 }}>
-            <AlertCircle size={15} style={{ color: "#ef4444" }} className="flex-shrink-0 mt-0.5" />
-            <p className="text-xs" style={{ color: "#F5F5F7" }}>{voice.error}</p>
-          </div>
-        )}
+        <VoiceStatusNotice />
 
         {/* Phone device frame */}
         <div className="flex justify-center">
@@ -173,21 +185,14 @@ export default function PhonePage() {
               {/* Screen content */}
               <div className="px-5 py-5">
                 {inCall ? (
-                  <ModernCallView
-                    status={voice.status}
-                    muted={voice.muted}
-                    onMute={voice.toggleMute}
-                    onHangup={voice.hangup}
-                    onDigit={voice.sendDigits}
-                    remoteNumber={callTarget}
-                    incoming={voice.status === "incoming"}
-                    onAccept={voice.accept}
-                    onReject={voice.reject}
-                  />
+                  <ModernCallView {...callViewProps(voice)} />
                 ) : showContacts ? (
                   <ContactsPanel onCall={placeCall} onClose={() => setShowContacts(false)} />
                 ) : (
-                  <ModernDialer onCall={placeCall} busy={voice.status === "connecting" || voice.status === "registering"} onOpenContacts={() => setShowContacts(true)} canRecord={isPaid} />
+                  <>
+                    <CallerIdSelect className="mb-3" />
+                    <ModernDialer onCall={placeCall} busy={voice.isConnecting} onOpenContacts={() => setShowContacts(true)} canRecord={false} />
+                  </>
                 )}
               </div>
 
