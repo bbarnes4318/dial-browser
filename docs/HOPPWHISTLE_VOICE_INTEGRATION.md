@@ -27,7 +27,7 @@ Base44 backend) touches RTP.
 
 | Variable | Required | Meaning |
 | --- | --- | --- |
-| `VITE_HOPPWHISTLE_API_URL` | yes | Hoppwhistle origin, e.g. `https://hopwhistle.com`. Unset → the phone shows as not configured. |
+| `VITE_HOPPWHISTLE_API_URL` | no | Hoppwhistle origin. Defaults to `https://agents.netenroll.com` (the NetEnroll agent portal), because Base44's hosted build has nowhere to set it. Override for staging. |
 | `VITE_HOPPWHISTLE_SIP_WS_URL` | no | Only if FreeSWITCH's SIP WebSocket is **not** at `wss://<api host>/ws` (the path Hoppwhistle's nginx proxies on 443 and Hoppwhistle's own phone uses). e.g. `wss://sip.example.com:7443`. |
 
 Nothing secret goes in either. SIP identities, passwords, caller IDs, ICE
