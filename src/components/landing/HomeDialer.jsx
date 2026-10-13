@@ -1,26 +1,29 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Power, AlertCircle, Signal, Wifi, BatteryFull, Grid3x3, MessageSquare, Clock, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { useTwilioVoice } from "@/hooks/useTwilioVoice";
+import { useHoppwhistleVoice, useCallSurface } from "@/telephony/hoppwhistle/HoppwhistleVoiceProvider";
+import { PhoneStatus } from "@/telephony/hoppwhistle";
 import EmergencyDisclaimerModal from "@/components/phone/EmergencyDisclaimerModal";
 import ModernDialer from "@/components/phone/ModernDialer";
 import ModernCallView from "@/components/phone/ModernCallView";
+import VoiceStatusNotice from "@/components/phone/VoiceStatusNotice";
+import CallerIdSelect from "@/components/phone/CallerIdSelect";
+import { callViewProps } from "@/components/phone/voiceCallViewProps";
 
-const CALL_STATES = ["connecting", "ringing", "in-call", "incoming"];
 
 // Compact, self-contained functional Dial Phone for the homepage.
-// Reuses the real telephony stack (Twilio softphone + entitlements) so a
+// Reuses the real telephony stack (the app-wide Hoppwhistle voice client) so a
 // logged-in member can place a call without leaving the landing page.
 export default function HomeDialer() {
   const { user } = useAuth();
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ackBusy, setAckBusy] = useState(false);
-  const [callTarget, setCallTarget] = useState("");
   const [showContacts, setShowContacts] = useState(false);
-  const voice = useTwilioVoice();
+  const voice = useHoppwhistleVoice();
+  useCallSurface();
 
   const loadAccount = useCallback(async () => {
     try {
@@ -34,8 +37,8 @@ export default function HomeDialer() {
 
   const entitlement = account?.entitlement;
   const needsDisclaimer = entitlement && !entitlement.disclaimer_acknowledged;
-  const isPaid = account?.tier && account.tier !== "free";
-  const inCall = CALL_STATES.includes(voice.status);
+  const inCall = Boolean(voice.callViewStatus);
+  const online = voice.phoneStatus === PhoneStatus.REGISTERED;
 
   const ackDisclaimer = async () => {
     setAckBusy(true);
@@ -46,9 +49,12 @@ export default function HomeDialer() {
     setAckBusy(false);
   };
 
-  const placeCall = async (to, record) => {
-    setCallTarget(to);
-    await voice.placeCall(to, { record });
+  // Recording is Hoppwhistle's policy, so there is no browser record flag.
+  const placeCall = (to) => voice.makeCall(to);
+  const togglePhone = () => {
+    if (online) return voice.disconnect();
+    if (voice.phoneStatus === PhoneStatus.STANDBY) return voice.takeOver();
+    return voice.reconnect();
   };
 
   return (
@@ -59,11 +65,12 @@ export default function HomeDialer() {
       <div className="flex items-center justify-between w-full max-w-[340px] mb-3 px-1">
         <p className="font-mono text-[10px] tracking-[0.4em]" style={{ color: "#D1FF26" }}>// LIVE DIAL PHONE</p>
         <button
-          onClick={voice.register}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 font-mono text-[9px] tracking-widest uppercase transition-all"
-          style={{ border: `0.5px solid ${voice.ready ? "rgba(209,255,38,0.4)" : "rgba(138,143,152,0.25)"}`, color: voice.ready ? "#D1FF26" : "#8A8F98" }}
+          onClick={togglePhone}
+          disabled={!user || voice.authRequired || needsDisclaimer || voice.phoneStatus === PhoneStatus.DISABLED}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 font-mono text-[9px] tracking-widest uppercase transition-all disabled:opacity-50"
+          style={{ border: `0.5px solid ${online ? "rgba(209,255,38,0.4)" : "rgba(138,143,152,0.25)"}`, color: online ? "#D1FF26" : "#8A8F98" }}
         >
-          <Power size={11} /> {voice.ready ? "Online" : "Go online"}
+          <Power size={11} /> {online ? "Online" : voice.isConnecting && !voice.dialing ? "Connecting" : "Go online"}
         </button>
       </div>
 
@@ -77,12 +84,7 @@ export default function HomeDialer() {
         </div>
       )}
 
-      {voice.error && (
-        <div className="w-full max-w-[340px] mb-3 p-3 flex items-start gap-2" style={{ background: "rgba(239,68,68,0.08)", border: "0.5px solid rgba(239,68,68,0.3)" }}>
-          <AlertCircle size={14} className="flex-shrink-0 mt-0.5" style={{ color: "#ef4444" }} />
-          <p className="text-[11px]" style={{ color: "#F5F5F7" }}>{voice.error}</p>
-        </div>
-      )}
+      {user && <VoiceStatusNotice compact />}
 
       {/* Phone device frame */}
       <div className="relative w-full max-w-[340px]" style={{ background: "linear-gradient(180deg, #1d2024 0%, #0c0e11 100%)", border: "1px solid rgba(209,255,38,0.25)", borderRadius: 36, padding: 10, boxShadow: "0 18px 60px rgba(0,0,0,0.6), 0 0 30px rgba(209,255,38,0.08)" }}>
@@ -106,21 +108,14 @@ export default function HomeDialer() {
           {/* Screen content */}
           <div className="px-5 py-5">
             {inCall ? (
-              <ModernCallView
-                status={voice.status}
-                muted={voice.muted}
-                onMute={voice.toggleMute}
-                onHangup={voice.hangup}
-                onDigit={voice.sendDigits}
-                remoteNumber={callTarget}
-                incoming={voice.status === "incoming"}
-                onAccept={voice.accept}
-                onReject={voice.reject}
-              />
+              <ModernCallView {...callViewProps(voice)} />
             ) : showContacts ? (
               <ContactsQuickPanel onCall={placeCall} onClose={() => setShowContacts(false)} />
             ) : (
-              <ModernDialer onCall={placeCall} busy={voice.status === "connecting" || voice.status === "registering"} onOpenContacts={() => setShowContacts(true)} canRecord={isPaid} />
+              <>
+                <CallerIdSelect className="mb-3" />
+                <ModernDialer onCall={placeCall} busy={voice.isConnecting} onOpenContacts={() => setShowContacts(true)} canRecord={false} />
+              </>
             )}
           </div>
 
@@ -187,13 +182,13 @@ function ContactsQuickPanel({ onCall, onClose }) {
       ) : (
         <div className="space-y-1.5 max-h-[260px] overflow-y-auto">
           {contacts.map((c) => (
-            <button key={c.id} onClick={() => onCall(c.phone_number || c.number || "")} className="w-full flex items-center gap-2 p-2 text-left transition-all hover:bg-[rgba(209,255,38,0.08)]" style={{ border: "0.5px solid rgba(138,143,152,0.15)" }}>
+            <button key={c.id} onClick={() => onCall(c.phone || c.phone_number || c.number || "")} className="w-full flex items-center gap-2 p-2 text-left transition-all hover:bg-[rgba(209,255,38,0.08)]" style={{ border: "0.5px solid rgba(138,143,152,0.15)" }}>
               <div className="w-8 h-8 flex items-center justify-center flex-shrink-0" style={{ background: "rgba(209,255,38,0.12)", borderRadius: 9999 }}>
                 <User size={14} style={{ color: "#D1FF26" }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold truncate" style={{ color: "#F5F5F7" }}>{c.name || "Unknown"}</p>
-                <p className="font-mono text-[10px] truncate" style={{ color: "#8A8F98" }}>{c.phone_number || c.number || "—"}</p>
+                <p className="font-mono text-[10px] truncate" style={{ color: "#8A8F98" }}>{c.phone || c.phone_number || c.number || "—"}</p>
               </div>
             </button>
           ))}

@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+import { endVoiceSessionOnLogout } from '@/telephony/hoppwhistle/logoutHook';
 
 const AuthContext = createContext();
 
@@ -115,6 +116,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = (shouldRedirect = true) => {
+    // Before the redirect: unregister the phone and drop the Hoppwhistle session.
+    endVoiceSessionOnLogout();
     setUser(null);
     setIsAuthenticated(false);
     

@@ -68,6 +68,8 @@ import VoiceSignatureTutorial from './pages/VoiceSignatureTutorial';
 import PersonalProfile from './pages/PersonalProfile';
 import SmsOptInPolicy from './pages/SmsOptInPolicy';
 import { VoiceGuidedProvider } from '@/lib/VoiceGuidedContext';
+import { HoppwhistleVoiceProvider } from '@/telephony/hoppwhistle/HoppwhistleVoiceProvider';
+import GlobalCallDock from '@/components/phone/GlobalCallDock';
 import SocialHub from './pages/SocialHub';
 import SocialProfilePage from './pages/SocialProfilePage';
 import CommunityGallery from './pages/CommunityGallery';
@@ -133,6 +135,7 @@ const AuthenticatedApp = () => {
     <AppTranslator />
     <LiveSignalIndicator />
     <FloatingHomePhoneButton />
+    <GlobalCallDock />
     <NotificationsBell variant="mobile" />
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -241,7 +244,9 @@ function App() {
           <Router>
             <ScrollToTop />
             <VoiceGuidedProvider>
-              <AuthenticatedApp />
+              <HoppwhistleVoiceProvider>
+                <AuthenticatedApp />
+              </HoppwhistleVoiceProvider>
             </VoiceGuidedProvider>
           </Router>
           <Toaster />

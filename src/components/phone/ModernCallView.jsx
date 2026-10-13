@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Phone, PhoneOff, Mic, MicOff, Grid3x3, Volume2, User } from "lucide-react";
+import { Phone, PhoneOff, Mic, MicOff, Grid3x3, User, Pause } from "lucide-react";
 
-export default function ModernCallView({ status, muted, onMute, onHangup, onDigit, remoteNumber, incoming, onAccept, onReject }) {
+// Optional: `answeredAt` anchors the timer to when the call was answered (so a
+// remount mid-call does not restart it), `onHold`/`held` add a hold toggle,
+// and `recording` shows the recording state reported by the phone system.
+export default function ModernCallView({ status, muted, onMute, onHangup, onDigit, remoteNumber, incoming, onAccept, onReject, answeredAt, onHold, held, recording }) {
   const [secs, setSecs] = useState(0);
   const [keypad, setKeypad] = useState(false);
 
+  const answeredMs = answeredAt ? new Date(answeredAt).getTime() : null;
   useEffect(() => {
     if (status !== "in-call") { setSecs(0); return; }
-    const t = setInterval(() => setSecs((s) => s + 1), 1000);
+    const elapsed = () => (answeredMs ? Math.max(0, Math.floor((Date.now() - answeredMs) / 1000)) : null);
+    setSecs((s) => elapsed() ?? s);
+    const t = setInterval(() => setSecs((s) => elapsed() ?? s + 1), 1000);
     return () => clearInterval(t);
-  }, [status]);
+  }, [status, answeredMs]);
 
   const mm = String(Math.floor(secs / 60)).padStart(2, "0");
   const ss = String(secs % 60).padStart(2, "0");
@@ -17,7 +23,7 @@ export default function ModernCallView({ status, muted, onMute, onHangup, onDigi
     status === "incoming" ? "Incoming call" :
     status === "connecting" ? "Connecting…" :
     status === "ringing" ? "Ringing…" :
-    status === "in-call" ? `${mm}:${ss}` : "";
+    status === "in-call" ? (held ? `On hold · ${mm}:${ss}` : `${mm}:${ss}`) : "";
 
   const initials = (remoteNumber || "?").replace(/[^A-Za-z0-9]/g, "").slice(-2).toUpperCase();
 
@@ -40,6 +46,11 @@ export default function ModernCallView({ status, muted, onMute, onHangup, onDigi
 
       <p className="font-heading font-black text-2xl break-all px-4" style={{ color: "#F5F5F7" }}>{remoteNumber || "Unknown"}</p>
       <p className="font-mono text-xs tracking-widest mt-1.5" style={{ color: status === "incoming" ? "#42E1F6" : "#D1FF26" }}>// {label}</p>
+      {recording && status === "in-call" && (
+        <p className="flex items-center gap-1.5 font-mono text-[9px] tracking-widest mt-1.5" style={{ color: "#ef4444" }}>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444" }} /> REC
+        </p>
+      )}
 
       {keypad && status === "in-call" && (
         <div className="grid grid-cols-3 gap-2 mt-5 max-w-[240px] w-full">
@@ -74,6 +85,12 @@ export default function ModernCallView({ status, muted, onMute, onHangup, onDigi
                   style={{ background: muted ? "rgba(209,255,38,0.18)" : "rgba(16,20,29,0.8)", border: "0.5px solid rgba(138,143,152,0.25)", color: muted ? "#D1FF26" : "#F5F5F7" }}>
                   {muted ? <MicOff size={20} /> : <Mic size={20} />}
                 </button>
+                {onHold && (
+                  <button onClick={onHold} title={held ? "Resume" : "Hold"} className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95"
+                    style={{ background: held ? "rgba(209,255,38,0.18)" : "rgba(16,20,29,0.8)", border: "0.5px solid rgba(138,143,152,0.25)", color: held ? "#D1FF26" : "#F5F5F7" }}>
+                    <Pause size={20} />
+                  </button>
+                )}
                 <button onClick={() => setKeypad((v) => !v)} className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95"
                   style={{ background: keypad ? "rgba(209,255,38,0.18)" : "rgba(16,20,29,0.8)", border: "0.5px solid rgba(138,143,152,0.25)", color: keypad ? "#D1FF26" : "#F5F5F7" }}>
                   <Grid3x3 size={20} />
