@@ -66,12 +66,13 @@ describe("normalizeDialable", () => {
 // ── Config ──────────────────────────────────────────────────────────────────
 
 describe("config", () => {
-  it("normalizes the API URL and enables only when set", () => {
+  it("normalizes the API URL, defaulting to the NetEnroll agent portal", () => {
     expect(readVoiceConfig({ VITE_HOPPWHISTLE_API_URL: "https://hopwhistle.com/api/v1/" })).toMatchObject({
       apiUrl: "https://hopwhistle.com",
       enabled: true,
     });
-    expect(readVoiceConfig({}).enabled).toBe(false);
+    expect(readVoiceConfig({})).toMatchObject({ apiUrl: "https://agents.netenroll.com", enabled: true });
+    expect(deriveSipWsUrl({ apiUrl: readVoiceConfig({}).apiUrl })).toBe("wss://agents.netenroll.com/ws");
   });
 
   it("derives the SIP socket from the API host, with explicit overrides winning", () => {

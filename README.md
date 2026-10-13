@@ -63,7 +63,9 @@ When you use `base44 dev`, the command injects the local Base44 values for you, 
 ## Phone (Hoppwhistle)
 
 The Dial Phone is a Hoppwhistle softphone client: calls, caller IDs, routing,
-recording and presence all come from Hoppwhistle. Point the app at it with:
+recording and presence all come from Hoppwhistle, at the NetEnroll agent
+portal (`https://agents.netenroll.com`) by default. Nothing needs configuring.
+To point a build elsewhere (e.g. staging):
 
 ```bash
 VITE_HOPPWHISTLE_API_URL=https://your-hoppwhistle-host

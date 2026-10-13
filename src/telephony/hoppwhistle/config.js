@@ -6,13 +6,22 @@
  * identities, caller IDs, ICE servers and permissions all come from
  * Hoppwhistle's authenticated endpoints at runtime -- never from here.
  *
- *   VITE_HOPPWHISTLE_API_URL     required. e.g. https://hopwhistle.com
+ *   VITE_HOPPWHISTLE_API_URL     optional. Defaults to the NetEnroll agent
+ *                                portal (DEFAULT_HOPPWHISTLE_API_URL).
  *   VITE_HOPPWHISTLE_SIP_WS_URL  optional. Only when the SIP WebSocket is not
  *                                at wss://<api host>/ws (see deriveSipWsUrl).
  *
  * Nothing secret belongs in a VITE_ variable: everything here ships to every
  * browser.
  */
+
+/**
+ * Where Hoppwhistle runs for Dial Browser: the NetEnroll agent portal. Built
+ * in because Base44's hosted build gives no place to set a VITE_ variable.
+ * It is a public hostname, not a credential; VITE_HOPPWHISTLE_API_URL
+ * overrides it (e.g. for a staging Hoppwhistle).
+ */
+export const DEFAULT_HOPPWHISTLE_API_URL = "https://agents.netenroll.com";
 
 /** The carrier waterfall a manual browser softphone call uses in Hoppwhistle. */
 export const SOFTPHONE_ROUTE_TYPE = "SOFTPHONE_MANUAL";
@@ -55,7 +64,7 @@ export function normalizeApiUrl(raw) {
 }
 
 export function readVoiceConfig(source = readEnv()) {
-  const apiUrl = normalizeApiUrl(source.VITE_HOPPWHISTLE_API_URL);
+  const apiUrl = normalizeApiUrl(source.VITE_HOPPWHISTLE_API_URL || DEFAULT_HOPPWHISTLE_API_URL);
   const sipWsUrlOverride = String(source.VITE_HOPPWHISTLE_SIP_WS_URL || "").trim();
   return {
     apiUrl,
