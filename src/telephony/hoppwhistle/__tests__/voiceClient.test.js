@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AgentStatus, CallStates, PhoneStatus } from "../callState.js";
 import { retryDelayMs } from "../voiceClient.js";
+import { VoiceError } from "../errors.js";
 import {
   FakeSession,
   apiError,
@@ -161,6 +162,32 @@ describe("registration", () => {
     expect(h.state().error.code).toBe("AUTH_EXPIRED");
     expect(h.state().phoneStatus).toBe(PhoneStatus.OFFLINE);
     expect(h.sip.last().stop).toHaveBeenCalled();
+  });
+
+  it("comes back on Reconnect once a member token can be had again", async () => {
+    const h = await connected();
+    h.auth.invalidate();
+    await flush();
+    expect(h.state().authRequired).toBe(true);
+    // A member's token is minted on demand: nothing to type, just reconnect.
+    h.auth.authenticated = true;
+    expect(await h.client.reconnect()).toBe(true);
+    expect(h.state().authRequired).toBe(false);
+    expect(h.state().phoneStatus).toBe(PhoneStatus.REGISTERED);
+  });
+
+  it("stops, without retrying, until the member accepts the emergency notice", async () => {
+    const h = createHarness({
+      apiOverrides: {
+        getWebRtcCredentials: async () => {
+          throw new VoiceError("DISCLAIMER_REQUIRED", undefined, { terminal: true });
+        },
+      },
+    });
+    expect(await h.client.connect()).toBe(false);
+    expect(h.state().phoneStatus).toBe(PhoneStatus.FAILED);
+    expect(h.state().error.code).toBe("DISCLAIMER_REQUIRED");
+    expect(h.timers.pending()).toHaveLength(0);
   });
 });
 

@@ -1,32 +1,26 @@
 /**
- * How Dial Browser proves to Hoppwhistle which agent is at the phone.
+ * How Dial Browser proves to Hoppwhistle which member is at the phone.
  *
  * ── The model ────────────────────────────────────────────────────────────────
  *
- * Every Hoppwhistle voice endpoint (`/api/v1/agent/*`) resolves the AGENT from
- * a per-user session token and refuses anything else: an API key carries a
- * tenant but no user, so it cannot act as an agent, and there is no
- * platform-wide credential that can. That is the property this adapter keeps.
+ * Members never sign in to Hoppwhistle. When the phone needs a token, it asks
+ * Dial Browser's own backend (the `hoppwhistle-voice-token` Base44 function).
+ * That function knows who is signed in to Dial Browser, holds the integration
+ * secret, and exchanges the member's identity for a one-hour Hoppwhistle
+ * VOICE token. The token is:
  *
- * Today Hoppwhistle offers exactly one way to obtain such a token: the agent
- * signs in (POST /api/auth/login) and receives their own session JWT, renewable
- * through POST /api/auth/refresh. Dial Browser and Hoppwhistle do not share a
- * user directory, so there is nothing Dial Browser could exchange its own
- * Base44 session for. The agent therefore links their Hoppwhistle account
- * once, here, and the token is:
+ *   * the member's own -- the integration secret never reaches the browser,
+ *     and nothing here is a VITE_ variable;
+ *   * voice-scoped: Hoppwhistle accepts it on the softphone routes only, and
+ *     enforces the member's limits itself;
+ *   * kept in memory only, bound to the Dial Browser user who obtained it, and
+ *     dropped the moment a different user (or nobody) is signed in;
+ *   * renewed a few minutes before it expires, and replaced once on a 401.
  *
- *   * the agent's OWN token -- never a master key, never in a VITE_ variable;
- *   * bound to the Dial Browser user who obtained it, and dropped the moment a
- *     different Dial Browser user is signed in on this browser;
- *   * renewed inside Hoppwhistle's refresh window and discarded on any 401.
- *
- * ── The replacement ──────────────────────────────────────────────────────────
- *
- * The preferred design is a short-lived, voice-scoped token minted for the
- * signed-in Dial Browser user (see docs/HOPPWHISTLE_VOICE_INTEGRATION.md,
- * "Backend gaps"). Everything outside this file depends only on the interface
- * below -- `getAccessToken()`, `isAuthenticated()`, `invalidate()`, `clear()`,
- * `subscribe()` -- so that exchange replaces this class and nothing else.
+ * Everything outside this file depends only on the interface below --
+ * `getAccessToken()`, `isAuthenticated()`, `getIdentity()`, `invalidate()`,
+ * `clear()`, `subscribe()` -- so the voice client does not know or care how
+ * the token was obtained.
  *
  * The token is never logged.
  */
@@ -34,11 +28,25 @@
 import { VoiceError } from "./errors.js";
 import { createVoiceLogger } from "./logger.js";
 
-const STORAGE_KEY = "hoppwhistle.voice.session.v1";
-/** Hoppwhistle refreshes tokens within 24h of expiry (routes/auth.ts REFRESH_WINDOW_MS). */
-const REFRESH_WINDOW_MS = 24 * 60 * 60 * 1000;
-/** Treat a token this close to expiry as already gone. */
-const EXPIRY_SKEW_MS = 30 * 1000;
+/**
+ * Where the old NetEnroll-login build kept the agent session. Nothing is stored
+ * there any more; it is only ever removed, so a browser that linked an agent
+ * account before does not keep that token lying around.
+ */
+export const LEGACY_AUTH_STORAGE_KEY = "hoppwhistle.voice.session.v1";
+
+export function clearLegacyAuthStorage(storage = safeLocalStorage()) {
+  try {
+    storage?.removeItem(LEGACY_AUTH_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/** Renew this long before expiry, so a call never starts on a dying token. */
+const RENEW_BEFORE_MS = 5 * 60 * 1000;
+/** After the exchange fails, don't hammer it. */
+const FAILURE_BACKOFF_MS = 15 * 1000;
 
 export function safeLocalStorage() {
   try {
@@ -66,134 +74,144 @@ function base64UrlDecode(s) {
   return atob(b64);
 }
 
-export class HoppwhistleAuth {
-  /** @param {any} [options] */
-  constructor({ apiUrl, storage = safeLocalStorage(), fetchImpl, now = () => Date.now(), logger } = {}) {
-    this.apiUrl = apiUrl;
-    this.storage = storage;
-    this.fetchImpl = fetchImpl || ((url, init) => fetch(url, init));
+/** What the exchange's refusal means for the person at the phone. */
+function exchangeErrorToVoice(err) {
+  if (err instanceof VoiceError) return err;
+  const status = err?.status ?? err?.response?.status ?? null;
+  const body = err?.data ?? err?.response?.data ?? null;
+  const code = body?.code;
+  if (status === 401 || code === "AUTH_REQUIRED") return new VoiceError("AUTH_REQUIRED");
+  if (code === "DISCLAIMER_REQUIRED") {
+    return new VoiceError("DISCLAIMER_REQUIRED", body?.error || undefined, { terminal: true });
+  }
+  if (code === "NOT_CONFIGURED") return new VoiceError("NOT_CONFIGURED", undefined, { terminal: true });
+  if (status === 403) return new VoiceError("ACCOUNT_REFUSED", body?.error || undefined, { terminal: true });
+  if (status == null) return new VoiceError("SERVER_UNREACHABLE");
+  return new VoiceError("CREDENTIALS_UNAVAILABLE", body?.error || undefined);
+}
+
+export class MemberVoiceAuth {
+  /**
+   * @param {any} options
+   *   exchange: async () => ({ token, expiresAt }) -- Dial Browser's backend.
+   */
+  constructor({ exchange, now = () => Date.now(), logger } = {}) {
+    this.exchange = exchange;
     this.now = now;
     this.log = logger || createVoiceLogger("Auth");
     this.owner = null;
-    this.memory = null; // used when storage is unavailable
+    this.record = null; // { token, owner, expiresAt }
     this.listeners = new Set();
-    this.refreshing = null;
+    this.inflight = null;
+    this.failedAt = null;
+    this.lastFailure = null;
   }
 
   // ── Identity binding ───────────────────────────────────────────────────────
 
-  /**
-   * Tie the stored Hoppwhistle session to the signed-in Dial Browser user. A
-   * session that belongs to someone else on this browser is discarded rather
-   * than inherited.
-   */
+  /** The signed-in Dial Browser user. A token minted for anyone else is dropped. */
   bindUser(dialBrowserUserId) {
     const owner = dialBrowserUserId ? String(dialBrowserUserId) : null;
+    if (owner === this.owner) return;
     this.owner = owner;
-    const record = this.read();
-    if (record && record.owner !== owner) {
-      this.log.info("Discarding a Hoppwhistle session that belongs to a different Dial Browser user");
-      this.clear();
-      return;
-    }
+    this.record = null;
+    this.inflight = null;
+    this.failedAt = null;
+    this.lastFailure = null;
     this.emit();
   }
 
   // ── Token access ──────────────────────────────────────────────────────────
 
+  /** A usable token in hand, without asking for one. */
   getToken() {
-    const record = this.read();
-    if (!record || !this.owner || record.owner !== this.owner) return null;
-    if (record.expiresAt && record.expiresAt - EXPIRY_SKEW_MS <= this.now()) return null;
-    return record.token;
+    const r = this.record;
+    if (!r || !this.owner || r.owner !== this.owner) return null;
+    if (r.expiresAt && r.expiresAt - RENEW_BEFORE_MS <= this.now()) return null;
+    return r.token;
   }
 
+  /**
+   * Whether the phone can get a token: a Dial Browser member is signed in. The
+   * token itself is fetched on demand, so this is true before the first one.
+   */
   isAuthenticated() {
-    return Boolean(this.getToken());
+    return Boolean(this.owner);
   }
 
   getIdentity() {
-    const record = this.read();
-    if (!record || !this.isAuthenticated()) return null;
-    return { email: record.email || null, expiresAt: record.expiresAt || null };
+    return this.owner ? { member: true } : null;
   }
 
+  /** The member's voice token, minting or renewing it as needed. Throws a VoiceError when it can't. */
   async getAccessToken() {
-    await this.refreshIfNeeded();
-    return this.getToken();
-  }
-
-  // ── Sign in / renew / sign out ────────────────────────────────────────────
-
-  async login(email, password) {
-    if (!this.owner) throw new VoiceError("AUTH_REQUIRED", "Sign in to Dial Browser first.");
-    if (!email || !password) throw new VoiceError("AUTH_FAILED", "Enter your Hoppwhistle email and password.");
-    let res;
-    try {
-      res = await this.fetchImpl(`${this.apiUrl}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: String(email).trim(), password }),
-      });
-    } catch {
-      throw new VoiceError("SERVER_UNREACHABLE");
+    const held = this.getToken();
+    if (held) return held;
+    if (!this.owner) return null;
+    if (this.inflight) return this.inflight;
+    if (this.failedAt !== null && this.now() - this.failedAt < FAILURE_BACKOFF_MS && this.lastFailure) {
+      throw this.lastFailure;
     }
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const serverMessage = body?.error?.message;
-      if (res.status === 401) throw new VoiceError("AUTH_FAILED");
-      throw new VoiceError("AUTH_FAILED", serverMessage || undefined);
-    }
-    if (!body?.token) throw new VoiceError("AUTH_FAILED", "Hoppwhistle did not return a session.");
-    this.write({ token: body.token, email: body.user?.email || String(email).trim() });
-    this.log.info("Linked a Hoppwhistle agent session");
-    return { email: body.user?.email || String(email).trim() };
-  }
 
-  /** Renew within Hoppwhistle's refresh window. Best-effort, single-flight. */
-  async refreshIfNeeded() {
-    const token = this.getToken();
-    if (!token) return;
-    const record = this.read();
-    if (!record?.expiresAt || record.expiresAt - this.now() > REFRESH_WINDOW_MS) return;
-    if (this.refreshing) return this.refreshing;
-    this.refreshing = (async () => {
+    const owner = this.owner;
+    const run = (async () => {
+      let result;
       try {
-        const res = await this.fetchImpl(`${this.apiUrl}/api/auth/refresh`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.status === 401) {
-          this.log.warn("Hoppwhistle refused to renew the session");
-          this.invalidate();
-          return;
+        result = await this.exchange();
+      } catch (err) {
+        const voiceErr = exchangeErrorToVoice(err);
+        // Back off only from outages; a refusal the member can fix (the
+        // emergency notice) must be retried the moment they fix it.
+        if (owner === this.owner && voiceErr.voice.retryable) {
+          this.failedAt = this.now();
+          this.lastFailure = voiceErr;
         }
-        const body = await res.json().catch(() => ({}));
-        if (res.ok && body?.token) {
-          this.write({ token: body.token, email: record.email });
-          this.log.info("Renewed the Hoppwhistle session");
-        }
-      } catch {
-        // Offline: the current token is still valid; try again next time.
-      } finally {
-        this.refreshing = null;
+        this.log.warn(`Could not get a phone token: ${voiceErr.voice.code}`);
+        throw voiceErr;
       }
+      const token = result?.token;
+      if (!token) throw new VoiceError("CREDENTIALS_UNAVAILABLE");
+      // Signed out or switched users while waiting: this token is not theirs.
+      if (owner !== this.owner) return null;
+      const parsed = result.expiresAt ? Date.parse(result.expiresAt) : NaN;
+      this.record = {
+        token,
+        owner,
+        expiresAt: jwtExpiryMs(token) ?? (Number.isFinite(parsed) ? parsed : null),
+      };
+      this.failedAt = null;
+      this.lastFailure = null;
+      this.log.info("Got a phone token");
+      return token;
     })();
-    return this.refreshing;
+    this.inflight = run;
+    try {
+      return await run;
+    } finally {
+      if (this.inflight === run) this.inflight = null;
+    }
   }
 
-  /** The server said 401: this token is finished. */
+  /** Mint a fresh token on the next request. */
+  get renewable() {
+    return Boolean(this.owner);
+  }
+
+  // ── Sign in / sign out ────────────────────────────────────────────────────
+
+  /** Members don't sign in to Hoppwhistle; their Dial Browser session is enough. */
+  async login() {
+    throw new VoiceError("UNSUPPORTED", "The phone signs in with your Dial Browser account.");
+  }
+
+  /** The server said 401: this token is finished. The next request mints another. */
   invalidate() {
-    this.clear();
+    this.record = null;
   }
 
   clear() {
-    this.memory = null;
-    try {
-      this.storage?.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
+    this.record = null;
+    this.inflight = null;
     this.emit();
   }
 
@@ -202,45 +220,9 @@ export class HoppwhistleAuth {
     return () => this.listeners.delete(listener);
   }
 
-  /** Another tab signed in or out. */
-  listenForChanges(win = typeof window !== "undefined" ? window : null) {
-    if (!win?.addEventListener) return () => {};
-    const onStorage = (e) => {
-      if (e.key === STORAGE_KEY) this.emit();
-    };
-    win.addEventListener("storage", onStorage);
-    return () => win.removeEventListener("storage", onStorage);
-  }
-
-  // ── Storage ───────────────────────────────────────────────────────────────
-
-  read() {
-    if (!this.storage) return this.memory;
-    try {
-      const raw = this.storage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  write({ token, email }) {
-    const record = {
-      token,
-      email: email || null,
-      owner: this.owner,
-      expiresAt: jwtExpiryMs(token),
-    };
-    if (!this.storage) {
-      this.memory = record;
-    } else {
-      try {
-        this.storage.setItem(STORAGE_KEY, JSON.stringify(record));
-      } catch {
-        this.memory = record;
-      }
-    }
-    this.emit();
+  /** Tokens live in memory per tab; there is nothing to sync between tabs. */
+  listenForChanges() {
+    return () => {};
   }
 
   emit() {
@@ -253,5 +235,3 @@ export class HoppwhistleAuth {
     }
   }
 }
-
-export { STORAGE_KEY as HOPPWHISTLE_AUTH_STORAGE_KEY };

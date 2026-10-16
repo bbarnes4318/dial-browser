@@ -2,7 +2,6 @@ import React from "react";
 import { AlertCircle, Info, X } from "lucide-react";
 import { useHoppwhistleVoice } from "@/telephony/hoppwhistle/HoppwhistleVoiceProvider";
 import { PhoneStatus, VoiceErrorCode } from "@/telephony/hoppwhistle";
-import HoppwhistleConnectCard from "@/components/phone/HoppwhistleConnectCard";
 
 const RECONNECTABLE = new Set([
   VoiceErrorCode.CONNECT_EXHAUSTED,
@@ -12,20 +11,20 @@ const RECONNECTABLE = new Set([
   VoiceErrorCode.NETWORK_DISCONNECTED,
   VoiceErrorCode.SERVER_UNREACHABLE,
   VoiceErrorCode.CREDENTIALS_UNAVAILABLE,
+  VoiceErrorCode.AUTH_EXPIRED,
 ]);
 
+const SIGNED_OUT = { code: VoiceErrorCode.AUTH_REQUIRED, message: "Sign in to Dial Browser to use the phone." };
+
 /**
- * What the phone needs from the person, if anything: sign in, reconnect,
- * allow audio, or take the phone over from another tab. Renders nothing when
- * the phone is fine.
+ * What the phone needs from the person, if anything: reconnect, allow audio,
+ * or take the phone over from another tab. There is no separate phone login:
+ * the phone signs in with the member's Dial Browser account. Renders nothing
+ * when the phone is fine.
  */
 export default function VoiceStatusNotice({ compact = false }) {
   const voice = useHoppwhistleVoice();
   const width = compact ? "w-full max-w-[340px]" : "";
-
-  if (voice.authRequired && voice.phoneStatus !== PhoneStatus.DISABLED) {
-    return <HoppwhistleConnectCard compact={compact} />;
-  }
 
   if (voice.phoneStatus === PhoneStatus.STANDBY) {
     const remote = voice.otherTab?.summary?.call;
@@ -47,7 +46,8 @@ export default function VoiceStatusNotice({ compact = false }) {
     );
   }
 
-  const error = voice.error;
+  const signedOut = voice.authRequired && voice.phoneStatus !== PhoneStatus.DISABLED;
+  const error = voice.error || (signedOut ? SIGNED_OUT : null);
   if (!error) return null;
   const canReconnect = RECONNECTABLE.has(error.code);
   const audioBlocked = error.code === VoiceErrorCode.AUDIO_PLAYBACK_BLOCKED;
@@ -65,7 +65,7 @@ export default function VoiceStatusNotice({ compact = false }) {
           </button>
         )}
       </div>
-      {!audioBlocked && (
+      {!audioBlocked && voice.error && (
         <button onClick={voice.clearError} title="Dismiss" className="p-0.5" style={{ color: "#8A8F98" }}>
           <X size={13} />
         </button>

@@ -31,7 +31,14 @@ Base44 backend) touches RTP.
 | `VITE_HOPPWHISTLE_SIP_WS_URL` | no | Only if FreeSWITCH's SIP WebSocket is **not** at `wss://<api host>/ws` (the path Hoppwhistle's nginx proxies on 443 and Hoppwhistle's own phone uses). e.g. `wss://sip.example.com:7443`. |
 
 Nothing secret goes in either. SIP identities, passwords, caller IDs, ICE
-servers and permissions come from Hoppwhistle at runtime, per agent.
+servers and permissions come from Hoppwhistle at runtime, per member.
+
+Base44 **secrets** (server side only, read by `hoppwhistle-voice-token`):
+
+| Secret | Required | Meaning |
+| --- | --- | --- |
+| `HOPPWHISTLE_INTEGRATION_SECRET` | yes | Shared with Hoppwhistle's `DIAL_BROWSER_INTEGRATION_SECRET` (≥ 32 chars). Without it the phone reports "not configured". |
+| `HOPPWHISTLE_API_URL` | no | Defaults to `https://agents.netenroll.com`. |
 
 Hoppwhistle's API already answers CORS for any origin (`apps/api/src/index.ts`,
 `origin: true`), so no Hoppwhistle change is needed for the HTTPS calls. The
@@ -46,8 +53,9 @@ production nginx `/ws` location (it is not in the repository's
 | Path | Purpose |
 | --- | --- |
 | `src/telephony/hoppwhistle/config.js` | Env config, SIP WebSocket URL derivation, route type, ICE/retry constants. |
-| `src/telephony/hoppwhistle/auth.js` | The isolated authentication adapter (Hoppwhistle agent session, bound to the Dial Browser user). |
-| `src/telephony/hoppwhistle/api.js` | The Hoppwhistle endpoints used, with the agent's bearer token. 401 ends the session. |
+| `src/telephony/hoppwhistle/auth.js` | The isolated authentication adapter: the member's voice token from `hoppwhistle-voice-token`, in memory, bound to the Dial Browser user. |
+| `base44/functions/hoppwhistle-voice-token/entry.ts` | Server side: vouches for the signed-in member, checks the emergency notice, exchanges the integration secret for the member's voice token. |
+| `src/telephony/hoppwhistle/api.js` | The Hoppwhistle endpoints used, with the member's voice token. A 401 gets one fresh token and one retry. |
 | `src/telephony/hoppwhistle/session.js` | Voice-session bootstrap: composes credentials + caller IDs into the shape of the desired `POST /api/v1/voice/session`. |
 | `src/telephony/hoppwhistle/sipTransport.js` | The only module importing `sip.js` (lazy-loaded on first connect). `registerAndConfirm`, INFO DTMF, session handles. |
 | `src/telephony/hoppwhistle/mediaManager.js` | Hidden remote-audio sink, late-track handling, autoplay blocking, mic preflight, sender-track mute, ringtone, DTMF tones. |
@@ -57,8 +65,7 @@ production nginx `/ws` location (it is not in the repository's
 | `src/telephony/hoppwhistle/voiceClient.js` | The call lifecycle, retries, presence, cleanup. Framework-free, fully injected. |
 | `src/telephony/hoppwhistle/HoppwhistleVoiceProvider.jsx` | React provider + `useHoppwhistleVoice()` / `useCallSurface()`. Mounted once in `App.jsx`. |
 | `src/telephony/hoppwhistle/logoutHook.js` | Lets `AuthContext.logout()` tear the phone down synchronously before its redirect. |
-| `src/components/phone/HoppwhistleConnectCard.jsx` | "Connect phone" sign-in with the Hoppwhistle agent account. |
-| `src/components/phone/VoiceStatusNotice.jsx` | Sign-in / reconnect / enable-audio / other-tab notices. |
+| `src/components/phone/VoiceStatusNotice.jsx` | Reconnect / enable-audio / other-tab notices (there is no phone login). |
 | `src/components/phone/CallerIdSelect.jsx` | Caller-ID picker over Hoppwhistle's numbers. |
 | `src/components/phone/GlobalCallDock.jsx` | Shows the call on pages without a phone (inbound can ring anywhere; a call survives navigation). |
 | `src/components/phone/voiceCallViewProps.js` | The one mapping from voice state to `ModernCallView` props. |
@@ -73,12 +80,11 @@ Twilio browser Device and the two functions that existed only to serve it).
 
 All are the endpoints Hoppwhistle's own browser phone calls
 (`apps/web/src/components/phone/phone-provider.tsx`), with the same bodies.
-Every one resolves the agent and tenant from the bearer token, never the body.
+Every one resolves the member and agency from the bearer token, never the body.
 
 | Endpoint | Used for |
 | --- | --- |
-| `POST /api/auth/login` | Linking the agent's Hoppwhistle account (once). |
-| `POST /api/auth/refresh` | Renewing the agent session inside Hoppwhistle's 24h refresh window. |
+| `POST /api/v1/integrations/dial-browser/voice-token` | **Server to server only**, from the `hoppwhistle-voice-token` Base44 function: the member's one-hour voice token. |
 | `GET /api/v1/agent/webrtc/credentials` | The agent's own SIP extension + per-agent password + realm + STUN/TURN. |
 | `GET /api/v1/agent/my-numbers` | Caller IDs the agent may present. |
 | `PUT /api/v1/agent/status` | Presence: `available` on registration and after calls, `on-call` on answer, `offline` on disconnect/close. |
@@ -96,24 +102,36 @@ Deliberately **not** used: `/call/:id/transfer` (metadata only, no SIP),
 
 ## 4. Authentication
 
-Hoppwhistle's agent endpoints only accept a **per-user** session: an API key
-carries a tenant but no user, so no platform credential can act as an agent,
-and none is in Dial Browser.
+Dial Browser members are the public: they have **no NetEnroll/Hoppwhistle
+account and never sign in to one**. Their Dial Browser sign-in is enough.
 
-Today:
+1. The member is signed in to Dial Browser (Base44).
+2. When the phone needs a token, `auth.js` (`MemberVoiceAuth`) calls the
+   Base44 function `hoppwhistle-voice-token`. That function, on Dial Browser's
+   server:
+   - checks who is signed in (`base44.auth.me()`);
+   - refuses until the member has accepted the non-emergency notice
+     (`PhoneEntitlement.disclaimer_acknowledged`) -- enforced server side;
+   - calls `POST /api/v1/integrations/dial-browser/voice-token` with the
+     integration secret (Base44 secret, never in the browser) and
+     `{ dialBrowserUserId }`;
+   - returns `{ token, expiresAt }` to the browser.
+3. Hoppwhistle maps the Dial Browser id to a member user in its **"Dial
+   Browser Members"** agency (created on first use) and signs a one-hour
+   voice token with its own key. It is accepted on the seven softphone routes
+   only (credentials, my-numbers, status, originate, answer, hangup) and is
+   not a NetEnroll login anywhere.
+4. The token is kept **in memory only**, bound to the Base44 user id, renewed
+   five minutes before it expires, and replaced once on a 401. A different
+   Dial Browser user, or a Dial Browser logout, drops it at once.
 
-1. The Dial Browser member is signed in to Dial Browser (Base44).
-2. On the phone, they link their Hoppwhistle agent account once
-   (`HoppwhistleConnectCard` → `POST /api/auth/login`). The password goes to
-   Hoppwhistle and is never stored.
-3. The returned agent JWT is stored under `hoppwhistle.voice.session.v1`,
-   **bound to the Base44 user id**. A different Dial Browser user on the same
-   browser never inherits it; Dial Browser logout deletes it synchronously.
-4. It is renewed inside Hoppwhistle's refresh window; any 401 ends it, and the
-   phone asks to sign in again (a live call is allowed to finish first).
+Member rules are Hoppwhistle's, not the browser's: US numbers only, 60
+minutes and 20 calls per rolling day, caller ID from the members agency's
+own pool, never recorded. Member lines run in Hoppwhistle's `dialbrowser`
+dialplan context, which bridges an INVITE only when it matches a call
+`originate` approved for that member, so G1 does not apply to them.
 
-`auth.js` is the only file that knows this. Replacing it with the token
-exchange in G6 changes that file and nothing else.
+The Hoppwhistle side is bbarnes4318/hoppwhistle PR #367.
 
 ---
 
@@ -272,6 +290,10 @@ Dial Browser does not work around any of these client-side.
 
 ### G6 — No voice-session bootstrap or cross-app token exchange
 
+> **Closed for Dial Browser members** by bbarnes4318/hoppwhistle PR #367 (the
+> voice-token exchange, §4). What remains below is the single-request
+> `/voice/session` bootstrap and explicit permissions.
+
 - **FILE**: new `apps/api/src/routes/voice-session.ts`; Dial Browser: new
   Base44 function (e.g. `base44/functions/hoppwhistle-voice-session`), then
   `src/telephony/hoppwhistle/auth.js` + `session.js` only.
@@ -362,10 +384,9 @@ behaviour that is not part of the softphone:
   audiobook "listen by phone" bridges.
 - Minute metering (`PhoneUsageWidget`) counted Twilio calls; Hoppwhistle calls
   are billed by Hoppwhistle and do not decrement it.
-- The non-emergency disclaimer used to be enforced server-side by
-  `mint-voice-token`; it is now enforced in the UI (the Phone page does not
-  connect until it is accepted). Server-side enforcement belongs in G6's token
-  function.
+- The non-emergency disclaimer is enforced server side again, by
+  `hoppwhistle-voice-token` (no token until it is accepted), as well as in the
+  UI.
 
 ---
 
@@ -392,8 +413,11 @@ behaviour that is not part of the softphone:
 - `tabCoordinator.test.js` — first tab owns, second stands by, ownership moves
   on close and on a silently dead tab, lease renewal, summaries, take-over;
   end-to-end with two voice clients.
-- `adapters.test.js` — number normalization, config, auth (binding, refresh
-  window, expiry), API (bearer, encoding, 401), bootstrap normalization.
+- `adapters.test.js` — number normalization, config, member auth (token on
+  demand, single flight, renewal before expiry, user binding, a token minted
+  for one member never handed to the next, disclaimer refusal retried at once,
+  outage back-off, error mapping), API (bearer, encoding, one fresh token on
+  401 then give up), bootstrap normalization.
 - `sipTransport.test.js` — `registerAndConfirm`, INFO DTMF + RFC 2833 fallback, handle mapping.
 - `sipTransport.integration.test.js` — **real SIP.js over a real WebSocket**
   against a digest-authenticating registrar: registered only after a valid
@@ -406,11 +430,12 @@ verified the INVITE on the wire (`sip:18655551212@realm`, `X-Caller-ID` from
 `originate`, `X-Hopwhistle-Call-Id`, `X-Hopwhistle-Route-Type:
 SOFTPHONE_MANUAL`, audio SDP), 180→ringing, 486→busy, CANCEL on hangup.
 
-## 9. Manual QA (requires a real Hoppwhistle agent account; not yet run)
+## 9. Manual QA (not yet run)
 
-1. Log in to Dial Browser. 2. Connect phone with the Hoppwhistle agent login.
-3. Indicator shows Online. 4. Caller IDs listed. 5. Select one. 6. Dial a
-mobile. 7. It rings. 8. Correct caller ID shown. 9. Two-way audio. 10. Mute.
+1. Log in to Dial Browser as an ordinary member. 2. Open the Phone page and
+accept the emergency notice; no other login is asked for. 3. Indicator shows
+Online. 4-5. (Caller IDs are chosen by Hoppwhistle for members.) 6. Dial a US
+mobile. 7. It rings. 8. A "Dial Browser Members" pool number is shown. 9. Two-way audio. 10. Mute.
 11. DTMF into an IVR. 12. Hold/resume. 13. Hang up from Dial Browser. 14. Call
 in Hoppwhistle call records. 15. Recording per Hoppwhistle policy. 16. Duration
 correct. 17. Inbound call to the agent's DID. 18. Rings (also on other pages,
@@ -427,8 +452,11 @@ indicator off, registration gone, agent offline.
 - **Browser audio**: autoplay can block remote audio until a click (surfaced as
   "Enable audio"); mic permission prompts on first call/answer.
 - **NAT**: no TURN today (G5).
-- **Auth**: agents type their Hoppwhistle password into Dial Browser until G6;
-  the token is a 7-day Hoppwhistle session stored in localStorage (as
-  Hoppwhistle's own web app does), bound to the Dial Browser user.
+- **Auth**: members never type a Hoppwhistle password; the voice token is
+  one-hour, route-restricted, in memory only, and bound to the Dial Browser
+  user. Anyone signed in to Dial Browser who accepted the notice can call,
+  within Hoppwhistle's per-member daily limits.
+- **Members pool**: with no numbers assigned to the "Dial Browser Members"
+  agency, every member call is refused ("Calling is not available right now").
 - **Transfer/merge ownership** (G2–G4).
 - **Hold** is Hoppwhistle's soft hold (agent audio cut, no MOH).

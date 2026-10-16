@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createHoppwhistleApi, HoppwhistleApiError } from "../api.js";
-import { HoppwhistleAuth, jwtExpiryMs } from "../auth.js";
+import { MemberVoiceAuth, jwtExpiryMs } from "../auth.js";
 import { deriveSipWsUrl, readVoiceConfig } from "../config.js";
 import { formatPhoneForDisplay, normalizeDialable, sameNumber } from "../numbers.js";
 import { classifyBootstrapError, fetchVoiceSession, normalizeLegacySession } from "../session.js";
 import { inboundCallSid, knownCallerName, toCallViewStatus } from "../callState.js";
 import { maskNumber } from "../logger.js";
-import { CREDENTIALS, NUMBERS, createMemoryStorage } from "./fakes.js";
+import { CREDENTIALS, NUMBERS } from "./fakes.js";
 
 const silent = { info() {}, warn() {}, error() {}, debug() {} };
 
@@ -85,58 +85,105 @@ describe("config", () => {
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 
-describe("HoppwhistleAuth", () => {
-  const now = Date.parse("2026-10-13T12:00:00Z");
+describe("MemberVoiceAuth", () => {
+  let now = Date.parse("2026-10-13T12:00:00Z");
 
-  function auth(fetchImpl, storage = createMemoryStorage()) {
-    const a = new HoppwhistleAuth({ apiUrl: "https://hw.test", storage, fetchImpl, now: () => now, logger: silent });
-    return { a, storage };
+  function auth(exchange) {
+    return new MemberVoiceAuth({ exchange, now: () => now, logger: silent });
   }
 
-  it("signs in with the agent's own credentials and binds the session to the Dial Browser user", async () => {
-    const token = jwt(now / 1000 + 7 * 86400);
-    const fetchImpl = vi.fn(async () => response(200, { token, user: { email: "agent@hw.test" } }));
-    const { a, storage } = auth(fetchImpl);
+  it("gets the member's token from Dial Browser's backend, with no Hoppwhistle login", async () => {
+    const token = jwt(now / 1000 + 3600);
+    const exchange = vi.fn(async () => ({ token, expiresAt: new Date(now + 3600_000).toISOString() }));
+    const a = auth(exchange);
+    expect(a.isAuthenticated()).toBe(false);
+    expect(await a.getAccessToken()).toBe(null);
+    expect(exchange).not.toHaveBeenCalled();
+
     a.bindUser("db-user-1");
-    await a.login("agent@hw.test", "pw");
-    expect(fetchImpl).toHaveBeenCalledWith("https://hw.test/api/auth/login", expect.objectContaining({ method: "POST" }));
-    expect(a.getToken()).toBe(token);
-    expect(a.getIdentity()).toMatchObject({ email: "agent@hw.test" });
-
-    // Another Dial Browser user on this browser does not inherit it.
-    a.bindUser("db-user-2");
-    expect(a.isAuthenticated()).toBe(false);
-    expect(Object.keys(storage.dump())).toHaveLength(0);
+    expect(a.isAuthenticated()).toBe(true);
+    expect(await a.getAccessToken()).toBe(token);
+    expect(await a.getAccessToken()).toBe(token);
+    expect(exchange).toHaveBeenCalledTimes(1);
   });
 
-  it("refuses bad credentials", async () => {
-    const { a } = auth(async () => response(401, { error: { message: "Invalid email or password" } }));
+  it("asks once for concurrent requests", async () => {
+    let release;
+    const exchange = vi.fn(() => new Promise((r) => (release = r)));
+    const a = auth(exchange);
     a.bindUser("u");
-    await expect(a.login("x@y", "bad")).rejects.toMatchObject({ voice: { code: "AUTH_FAILED" } });
-    expect(a.isAuthenticated()).toBe(false);
+    const both = Promise.all([a.getAccessToken(), a.getAccessToken()]);
+    release({ token: jwt(now / 1000 + 3600) });
+    const [t1, t2] = await both;
+    expect(t1).toBe(t2);
+    expect(exchange).toHaveBeenCalledTimes(1);
   });
 
-  it("treats an expired token as no session", () => {
-    const storage = createMemoryStorage();
-    storage.setItem("hoppwhistle.voice.session.v1", JSON.stringify({ token: "t", owner: "u", expiresAt: now - 1 }));
-    const { a } = auth(vi.fn(), storage);
+  it("renews shortly before expiry", async () => {
+    const first = jwt(now / 1000 + 3600);
+    const second = jwt(now / 1000 + 7200);
+    const exchange = vi.fn().mockResolvedValueOnce({ token: first }).mockResolvedValueOnce({ token: second });
+    const a = auth(exchange);
     a.bindUser("u");
-    expect(a.isAuthenticated()).toBe(false);
+    expect(await a.getAccessToken()).toBe(first);
+    now += 56 * 60 * 1000; // inside the last five minutes
+    expect(await a.getAccessToken()).toBe(second);
+    now -= 56 * 60 * 1000;
   });
 
-  it("renews inside Hoppwhistle's refresh window, and not outside it", async () => {
-    const soon = jwt(now / 1000 + 3600);
-    const renewed = jwt(now / 1000 + 7 * 86400);
-    const fetchImpl = vi.fn(async (url) =>
-      url.endsWith("/login") ? response(200, { token: soon }) : response(200, { token: renewed }),
-    );
-    const { a } = auth(fetchImpl);
-    a.bindUser("u");
-    await a.login("a@b", "pw");
-    expect(await a.getAccessToken()).toBe(renewed);
-    expect(fetchImpl.mock.calls[1][0]).toBe("https://hw.test/api/auth/refresh");
+  it("drops the token when a different member, or nobody, is signed in", async () => {
+    const exchange = vi.fn(async () => ({ token: jwt(now / 1000 + 3600) }));
+    const a = auth(exchange);
+    a.bindUser("db-user-1");
     await a.getAccessToken();
-    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    a.bindUser("db-user-2");
+    expect(a.getToken()).toBe(null);
+    a.bindUser(null);
+    expect(a.isAuthenticated()).toBe(false);
+    expect(await a.getAccessToken()).toBe(null);
+  });
+
+  it("does not hand a token minted for one member to the next", async () => {
+    let release;
+    const a = auth(() => new Promise((r) => (release = r)));
+    a.bindUser("db-user-1");
+    const pending = a.getAccessToken();
+    a.bindUser("db-user-2");
+    release({ token: jwt(now / 1000 + 3600) });
+    expect(await pending).toBe(null);
+    expect(a.getToken()).toBe(null);
+  });
+
+  it("explains a refusal the member can fix, and retries it as soon as they do", async () => {
+    const refusal = { status: 403, data: { code: "DISCLAIMER_REQUIRED", error: "Accept the notice first." } };
+    const token = jwt(now / 1000 + 3600);
+    const exchange = vi.fn().mockRejectedValueOnce(refusal).mockResolvedValueOnce({ token });
+    const a = auth(exchange);
+    a.bindUser("u");
+    await expect(a.getAccessToken()).rejects.toMatchObject({
+      voice: { code: "DISCLAIMER_REQUIRED", message: "Accept the notice first.", terminal: true },
+    });
+    expect(await a.getAccessToken()).toBe(token);
+  });
+
+  it("backs off briefly after an outage", async () => {
+    const exchange = vi.fn().mockRejectedValue({ status: 503, data: { code: "UNAVAILABLE" } });
+    const a = auth(exchange);
+    a.bindUser("u");
+    await expect(a.getAccessToken()).rejects.toMatchObject({ voice: { code: "CREDENTIALS_UNAVAILABLE" } });
+    await expect(a.getAccessToken()).rejects.toMatchObject({ voice: { code: "CREDENTIALS_UNAVAILABLE" } });
+    expect(exchange).toHaveBeenCalledTimes(1);
+  });
+
+  it("maps a lost Dial Browser session and an unconfigured phone", async () => {
+    const a = auth(vi.fn().mockRejectedValueOnce({ status: 401 }).mockRejectedValueOnce({ status: 503, data: { code: "NOT_CONFIGURED" } }));
+    a.bindUser("u");
+    await expect(a.getAccessToken()).rejects.toMatchObject({ voice: { code: "AUTH_REQUIRED" } });
+    await expect(a.getAccessToken()).rejects.toMatchObject({ voice: { code: "NOT_CONFIGURED", terminal: true } });
+  });
+
+  it("has no Hoppwhistle password login", async () => {
+    await expect(auth(vi.fn()).login("a@b", "pw")).rejects.toMatchObject({ voice: { code: "UNSUPPORTED" } });
   });
 
   it("decodes JWT expiry", () => {
@@ -174,6 +221,25 @@ describe("Hoppwhistle API adapter", () => {
     const { api: a, auth } = api(async () => response(401, {}));
     await expect(a.getMyNumbers()).rejects.toMatchObject({ voice: { code: "AUTH_EXPIRED" } });
     expect(auth.invalidate).toHaveBeenCalled();
+  });
+
+  it("on a 401, mints one fresh member token and tries once more", async () => {
+    const tokens = ["stale", "fresh"];
+    const auth = { renewable: true, getAccessToken: async () => tokens[0], invalidate: vi.fn(() => tokens.shift()) };
+    const fetchImpl = vi.fn(async (_url, init) =>
+      init.headers.Authorization === "Bearer fresh" ? response(200, { numbers: [] }) : response(401, {}),
+    );
+    const a = createHoppwhistleApi({ apiUrl: "https://hw.test", auth, fetchImpl });
+    await expect(a.getMyNumbers()).resolves.toEqual({ numbers: [] });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives up after the fresh token is refused too", async () => {
+    const auth = { renewable: true, getAccessToken: async () => "t", invalidate: vi.fn() };
+    const fetchImpl = vi.fn(async () => response(401, {}));
+    const a = createHoppwhistleApi({ apiUrl: "https://hw.test", auth, fetchImpl });
+    await expect(a.getMyNumbers()).rejects.toMatchObject({ voice: { code: "AUTH_EXPIRED" } });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
   it("does not call Hoppwhistle at all without a session", async () => {
