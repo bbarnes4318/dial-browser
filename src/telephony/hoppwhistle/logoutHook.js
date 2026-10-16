@@ -3,12 +3,12 @@
  *
  * AuthContext.logout() redirects straight away, before any React effect
  * watching the user could run, so the phone is told synchronously instead:
- * the Hoppwhistle session is removed from storage here, whatever else
- * happens, and the mounted voice provider gets the chance to unregister and
- * mark the agent offline.
+ * the mounted voice provider drops the member's voice token (held in memory
+ * only), unregisters and marks the line offline, and any session left in
+ * storage by the old agent-login build is removed, whatever else happens.
  */
 
-import { HOPPWHISTLE_AUTH_STORAGE_KEY, safeLocalStorage } from "./auth.js";
+import { clearLegacyAuthStorage } from "./auth.js";
 
 const handlers = new Set();
 
@@ -25,9 +25,5 @@ export function endVoiceSessionOnLogout() {
       // sign-out must not fail because the phone did
     }
   }
-  try {
-    safeLocalStorage()?.removeItem(HOPPWHISTLE_AUTH_STORAGE_KEY);
-  } catch {
-    // ignore
-  }
+  clearLegacyAuthStorage();
 }

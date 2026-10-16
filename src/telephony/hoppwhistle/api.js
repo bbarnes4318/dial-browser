@@ -8,9 +8,9 @@
  * (returns `sent: true` and sends nothing), `/call/:id/mute` -- are
  * deliberately absent: calling them would look like a feature and do nothing.
  *
- * Every request carries the agent's own bearer token from the auth adapter.
- * Hoppwhistle derives the agent and tenant from that token, never from the
- * body, which is what scopes every call below to the signed-in agent.
+ * Every request carries the member's own voice token from the auth adapter.
+ * Hoppwhistle derives the caller and agency from that token, never from the
+ * body, which is what scopes every call below to the signed-in member.
  */
 
 import { VoiceError } from "./errors.js";
@@ -28,7 +28,7 @@ export class HoppwhistleApiError extends Error {
 export function createHoppwhistleApi({ apiUrl, auth, fetchImpl, onAuthExpired }) {
   const doFetch = fetchImpl || ((url, init) => fetch(url, init));
 
-  async function request(method, path, body, { keepalive = false } = {}) {
+  async function request(method, path, body, { keepalive = false } = {}, retried = false) {
     const token = await auth.getAccessToken();
     if (!token) throw new VoiceError("AUTH_REQUIRED");
 
@@ -49,9 +49,11 @@ export function createHoppwhistleApi({ apiUrl, auth, fetchImpl, onAuthExpired })
 
     const data = await res.json().catch(() => ({}));
     if (res.status === 401) {
-      // The session has ended (expired, revoked by a password change). It is
-      // not retried with anything else: there is nothing else to retry with.
+      // The token has ended (expired between the check and the request, or
+      // revoked). A member's token is minted on demand, so get one fresh
+      // token and try once more; a second 401 means the phone is refused.
       auth.invalidate();
+      if (auth.renewable && !retried) return request(method, path, body, { keepalive }, true);
       onAuthExpired?.();
       throw new VoiceError("AUTH_EXPIRED");
     }

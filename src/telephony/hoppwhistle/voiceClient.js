@@ -237,6 +237,7 @@ export class HoppwhistleVoiceClient {
       return Promise.resolve(false);
     }
     this.desired = true;
+    if (this.state.authRequired) this.setState({ authRequired: false, identity: this.auth.getIdentity?.() || null });
     const registered = () => this.state.phoneStatus === PhoneStatus.REGISTERED;
     if (registered() && this.stack) return Promise.resolve(true);
     if (this.connecting) return this.connecting.then(registered);

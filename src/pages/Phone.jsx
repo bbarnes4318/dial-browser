@@ -53,8 +53,9 @@ export default function PhonePage() {
   const isPaid = account?.tier && account.tier !== "free";
 
   // Bring the phone online on arrival, once, after the non-emergency disclaimer
-  // is accepted and a Hoppwhistle session is linked. A deliberate "go offline"
-  // is respected for the rest of the visit.
+  // is accepted. The phone signs in with the member's Dial Browser account; there
+  // is no separate phone login. A deliberate "go offline" is respected for the
+  // rest of the visit.
   useEffect(() => {
     if (loading || needsDisclaimer || voice.authRequired || autoConnected.current) return;
     if (voice.phoneStatus !== PhoneStatus.OFFLINE) return;
